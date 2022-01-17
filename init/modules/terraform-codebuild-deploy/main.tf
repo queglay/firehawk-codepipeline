@@ -127,7 +127,7 @@ resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
       ],
       "Condition": {
         "StringEquals": {
-          "ec2:Subnet": "${tolist(data.aws_subnet_ids.private.arn)}",
+          "ec2:Subnet": "${tolist(data.aws_subnet.private.arn)}",
           "ec2:AuthorizedService": "codebuild.amazonaws.com"
         }
       }
