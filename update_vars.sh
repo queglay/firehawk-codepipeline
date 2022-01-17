@@ -171,45 +171,6 @@ function export_vars {
 
   ### Query existance of images required for deployment of instances.  Some parts of infrastructure can be deployed without images
 
-  # latest_ami=false # If using latest, this should only be allowed in a dev environment.  Otherwise, all images must be built from the same template
-  # if [[ "$PKR_VAR_resourcetier" != "dev" ]]; then
-  #   latest_ami=false
-  # fi
-  # AMI query by commit - Vault and Consul Servers
-
-  export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)" 
-
-  if [[ "$skip_find_amis" == "false" ]]; then
-    # AMI query by commit - Vault and Consul Server
-    ami_role="firehawk_ubuntu18_vault_consul_server_ami"
-    export TF_VAR_vault_consul_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_vault_consul_ami_id" "TF_VAR_vault_consul_ami_id"
-    # AMI query by commit - Vault and Consul Client
-    ami_role="firehawk_centos7_ami"
-    export TF_VAR_vault_client_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_vault_client_ami_id" "TF_VAR_vault_client_ami_id"
-    # AMI query by commit - Bastion Host
-    ami_role="firehawk_centos7_ami"
-    export TF_VAR_bastion_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_bastion_ami_id" "TF_VAR_bastion_ami_id"
-    # AMI query by commit - Open VPN Server
-    ami_role="firehawk_openvpn_server_ami"
-    export TF_VAR_openvpn_server_ami=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_openvpn_server_ami" "TF_VAR_openvpn_server_ami"
-    # AMI query by commit - Deadline DB
-    ami_role="firehawk_deadlinedb_ami"
-    export TF_VAR_deadline_db_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_deadline_db_ami_id" "TF_VAR_deadline_db_ami_id"
-    # AMI query by commit - Render node
-    ami_role="firehawk_centos7_rendernode_ami"
-    export TF_VAR_node_centos7_houdini_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_node_centos7_houdini_ami_id" "TF_VAR_node_centos7_houdini_ami_id"
-    # AMI query by commit - Workstation
-    ami_role="firehawk_amazonlinux2_nicedcv_ami"
-    export TF_VAR_workstation_amazonlinux2_nicedcv_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
-  fi
-
   # Terraform Vars
   export TF_VAR_general_use_ssh_key="$HOME/.ssh/id_rsa" # For debugging deployment of most resources- not for production use.
   export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
