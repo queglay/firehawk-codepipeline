@@ -8,7 +8,7 @@ aws sts get-caller-identity
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
 
-SUDOCMD="" # replace with text sudo to use elevated permissions
+SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 
 # $SUDOCMD yum install -y git
 $SUDOCMD yum install -y python
