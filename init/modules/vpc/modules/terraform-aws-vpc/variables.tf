@@ -33,12 +33,6 @@ variable "vpc_cidr" {
   type        = string
 }
 
-variable "deployer_ip_cidr" {
-  description = "The remote public address that will connect to the bastion instance and other public instances.  This is used to limit inbound access to public facing hosts like the VPN from your site's public IP."
-  type        = string
-  default     = null
-}
-
 variable "remote_cloud_private_ip_cidr" {
   description = "The remote private address that will connect to the bastion instance and other public instances.  This is used to limit inbound access to public facing hosts like the VPN from your site's public IP."
   type        = string
