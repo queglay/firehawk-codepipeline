@@ -8,6 +8,6 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 
 # terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
-terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
+terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
 
 cd $EXECDIR
