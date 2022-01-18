@@ -54,13 +54,23 @@ data "aws_subnet" "private" {
 
 locals {
   common_tags = var.common_tags
-  # public_subnet_arns = [for s in data.aws_subnet.public : s.arn]
+  extra_tags = { "role":"codebuild"}
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
-  # bucket_name = var.bucketlogs_bucket
 }
 
-output "public_subnet_arns" {
-  value = local.public_subnet_arns
+resource "aws_security_group" "codebuild_deployer" {
+  name        = "codebuild-deployer"
+  vpc_id      = data.aws_vpc.primary.id
+  description = "CodeBuild Deployer Security Group"
+  tags        = merge(map("Name", "codebuild-deployer"), var.common_tags, local.extra_tags)
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "all outgoing traffic"
+  }
 }
 
 variable "bucket_extension" {
@@ -171,7 +181,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
     image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
-    # type                        = "LINUX_CONTAINER"
+    type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
     # environment_variable {
@@ -210,10 +220,9 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
     subnets = data.aws_subnet_ids.public.ids
 
-    # security_group_ids = [
-    #   aws_security_group.example1.id,
-    #   aws_security_group.example2.id,
-    # ]
+    security_group_ids = [
+      aws_security_group.codebuild_deployer.id
+    ]
   }
 
   # tags = {
