@@ -55,7 +55,7 @@ data "aws_subnet" "private" {
 locals {
   common_tags = var.common_tags
   # public_subnet_arns = [for s in data.aws_subnet.public : s.arn]
-  public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s)])} ]"
+  public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", tostring(s))])} ]"
   # bucket_name = var.bucketlogs_bucket
 }
 
