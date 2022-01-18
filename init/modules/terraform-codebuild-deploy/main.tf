@@ -264,6 +264,22 @@ POLICY
 # POLICY
 # }
 
+resource "aws_codebuild_webhook" "git_push" {
+  project_name = aws_codebuild_project.firehawk_deployer.name
+  build_type   = "BUILD"
+  filter_group {
+    filter {
+      type    = "EVENT"
+      pattern = "PUSH"
+    }
+
+    filter {
+      type    = "HEAD_REF"
+      pattern = "dev"
+    }
+  }
+}
+
 resource "aws_codebuild_project" "firehawk_deployer" {
   name                   = "firehawk-deployer"
   description            = "firehawk_deployer_project"
