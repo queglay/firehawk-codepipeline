@@ -1,6 +1,13 @@
 #!/bin/bash
 
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
 DEFAULT_LATEST_AMI="false"
+
+if [[ -f "$SCRIPTDIR/default_vars" ]]; then
+  echo "Sourcing: $SCRIPTDIR/default_vars:"
+  source "$SCRIPTDIR/default_vars"
+fi
 
 to_abs_path() {
   python3 -c "import os; print(os.path.abspath('$1'))"
@@ -85,8 +92,6 @@ function warn_if_invalid {
     printf "\n  $ami_result\n\n"
   fi
 }
-
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
 function export_vars {
   local -r latest_ami="$1"
