@@ -6,11 +6,6 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-locals {
-  common_tags = var.common_tags
-  # bucket_name = var.bucketlogs_bucket
-}
-
 # # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
 
 # resource "aws_s3_bucket" "log_bucket" {
@@ -55,6 +50,12 @@ data "aws_subnet_ids" "private" {
 data "aws_subnet" "private" {
   for_each = data.aws_subnet_ids.private.ids
   id       = each.value
+}
+
+locals {
+  common_tags = var.common_tags
+  public_subnet_arns = [for s in data.aws_subnet.public : s.arn]
+  # bucket_name = var.bucketlogs_bucket
 }
 
 variable "bucket_extension" {
@@ -127,7 +128,7 @@ resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
       ],
       "Condition": {
         "StringEquals": {
-          "ec2:Subnet": "${[for s in data.aws_subnet.public : s.arn]}",
+          "ec2:Subnet": "${local.public_subnet_arns}",
           "ec2:AuthorizedService": "codebuild.amazonaws.com"
         }
       }
