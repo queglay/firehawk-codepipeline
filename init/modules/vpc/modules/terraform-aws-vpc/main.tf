@@ -67,7 +67,7 @@ resource "aws_subnet" "public_subnet" {
   availability_zone       = element(data.aws_availability_zones.available.names, count.index)
   cidr_block              = element(var.public_subnets, count.index)
   map_public_ip_on_launch = true
-  tags                    = merge(var.common_tags, local.extra_tags, map("area", "public"), map("Name", format("public%s_%s", count.index, local.name)))
+  tags                    = merge(var.common_tags, local.extra_tags, tomap({"area": "public"}), map("Name", format("public%s_%s", count.index, local.name)))
 }
 
 locals {
@@ -80,7 +80,7 @@ resource "aws_subnet" "private_subnet" {
   vpc_id            = local.vpc_id
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
   cidr_block        = element(var.private_subnets, count.index)
-  tags              = merge(var.common_tags, local.extra_tags, map("area", "private"), map("Name", format("private%s_%s", count.index, local.name)))
+  tags              = merge(var.common_tags, local.extra_tags, tomap({"area": "private"}), map("Name", format("private%s_%s", count.index, local.name)))
 }
 
 resource "aws_eip" "nat" {
@@ -100,7 +100,7 @@ resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to sav
 resource "aws_route_table" "private" {
   count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags   = merge(var.common_tags, local.extra_tags, map("area", "private"), map("Name", "${local.name}_private"))
+  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "private"}), map("Name", "${local.name}_private"))
 }
 
 resource "aws_route" "private_nat_gateway" {
@@ -116,7 +116,7 @@ resource "aws_route" "private_nat_gateway" {
 resource "aws_route_table" "public" {
   count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags   = merge(var.common_tags, local.extra_tags, map("area", "public"), map("Name", "${local.name}_public"))
+  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "public"}), map("Name", "${local.name}_public"))
 }
 
 resource "aws_route" "public_gateway" {

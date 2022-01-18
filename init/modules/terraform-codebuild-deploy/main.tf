@@ -34,7 +34,7 @@ data "aws_internet_gateway" "gw" {
 
 data "aws_subnet_ids" "public" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "public")
+  tags   = tomap({ "area" : "public" })
 }
 
 data "aws_subnet" "public" {
@@ -44,7 +44,7 @@ data "aws_subnet" "public" {
 
 data "aws_subnet_ids" "private" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "private")
+  tags   = tomap({ "area" : "private" })
 }
 
 data "aws_subnet" "private" {
@@ -53,8 +53,8 @@ data "aws_subnet" "private" {
 }
 
 locals {
-  common_tags = var.common_tags
-  extra_tags = { "role":"codebuild"}
+  common_tags        = var.common_tags
+  extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
 }
 
@@ -62,7 +62,7 @@ resource "aws_security_group" "codebuild_deployer" {
   name        = "codebuild-deployer"
   vpc_id      = data.aws_vpc.primary.id
   description = "CodeBuild Deployer Security Group"
-  tags        = merge(map("Name", "codebuild-deployer"), var.common_tags, local.extra_tags)
+  tags        = merge(tomap({ "Name" : "codebuild-deployer" }), var.common_tags, local.extra_tags)
 
   egress {
     protocol    = "-1"
@@ -74,7 +74,7 @@ resource "aws_security_group" "codebuild_deployer" {
 }
 
 variable "bucket_extension" {
-  type = string
+  type        = string
   description = "The suffix used to generate the bucket name for the codebuild cache."
 }
 
@@ -164,16 +164,11 @@ POLICY
 }
 
 resource "aws_codebuild_project" "firehawk_deployer" {
-  name          = "firehawk-deployer"
-  description   = "firehawk_deployer_project"
-  build_timeout = "5"
-  service_role  = aws_iam_role.firehawk_codebuild_deployer_role.arn
-
-  build_batch_config {
-    restrictions {
-      maximum_builds_allowed = 1
-    }
-  }
+  name                   = "firehawk-deployer"
+  description            = "firehawk_deployer_project"
+  build_timeout          = "5"
+  service_role           = aws_iam_role.firehawk_codebuild_deployer_role.arn
+  concurrent_build_limit = 1
   artifacts {
     type = "NO_ARTIFACTS"
   }
@@ -203,7 +198,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
   logs_config {
     cloudwatch_logs {
-      group_name  = "firehawk-deploy"
+      group_name = "firehawk-deploy"
       # stream_name = "log-stream"
     }
   }
