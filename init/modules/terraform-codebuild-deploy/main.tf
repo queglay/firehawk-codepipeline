@@ -169,10 +169,11 @@ resource "aws_codebuild_project" "firehawk_deployer" {
   build_timeout = "5"
   service_role  = aws_iam_role.firehawk_codebuild_deployer_role.arn
 
-  restrictions {
-    maximum_builds_allowed = 1
+  build_batch_config {
+    restrictions {
+      maximum_builds_allowed = 1
+    }
   }
-
   artifacts {
     type = "NO_ARTIFACTS"
   }
