@@ -315,7 +315,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
   logs_config {
     cloudwatch_logs {
-      group_name = "firehawk-deploy"
+      # group_name = "firehawk-deploy"
       # stream_name = "log-stream"
     }
   }
