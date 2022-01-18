@@ -84,7 +84,13 @@ resource "aws_s3_bucket" "deployer_cache" {
 }
 
 resource "aws_iam_role" "firehawk_codebuild_deployer_role" {
-  name = "firehawk_codebuild_deployer_role"
+  name = "CodeBuildDeployerRoleFirehawk"
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/IAMFullAccess",
+    "arn:aws:iam::aws:policy/AdministratorAccess",
+    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  ]
 
   assume_role_policy = <<EOF
 {
@@ -102,66 +108,161 @@ resource "aws_iam_role" "firehawk_codebuild_deployer_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
-  role = aws_iam_role.firehawk_codebuild_deployer_role.name
-
+resource "aws_iam_role_policy" "codebuild_service_role_policy" {
+  name   = "CodeBuildServicePolicyFirehawk"
+  role   = aws_iam_role.firehawk_codebuild_deployer_role.name
   policy = <<POLICY
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Resource": [
-        "*"
-      ],
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateNetworkInterface",
-        "ec2:DescribeDhcpOptions",
-        "ec2:DescribeNetworkInterfaces",
-        "ec2:DeleteNetworkInterface",
-        "ec2:DescribeSubnets",
-        "ec2:DescribeSecurityGroups",
-        "ec2:DescribeVpcs"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateNetworkInterfacePermission"
-      ],
-      "Resource": [
-        "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*"
-      ],
-      "Condition": {
-        "StringEquals": {
-          "ec2:Subnet": ${local.public_subnet_arns},
-          "ec2:AuthorizedService": "codebuild.amazonaws.com"
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "kms:*",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CloudWatchLogsPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodeCommitPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:GitPull"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3GetObjectPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3PutObjectPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECRPullPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECRAuthPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3BucketIdentity",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "*"
         }
-      }
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:*"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.deployer_cache.arn}",
-        "${aws_s3_bucket.deployer_cache.arn}/*"
-      ]
-    }
-  ]
+    ]
 }
 POLICY
 }
+
+
+# resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
+#   role = aws_iam_role.firehawk_codebuild_deployer_role.name
+
+#   policy = <<POLICY
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Resource": [
+#         "*"
+#       ],
+#       "Action": [
+#         "logs:CreateLogGroup",
+#         "logs:CreateLogStream",
+#         "logs:PutLogEvents"
+#       ]
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "ec2:CreateNetworkInterface",
+#         "ec2:DescribeDhcpOptions",
+#         "ec2:DescribeNetworkInterfaces",
+#         "ec2:DeleteNetworkInterface",
+#         "ec2:DescribeSubnets",
+#         "ec2:DescribeSecurityGroups",
+#         "ec2:DescribeVpcs"
+#       ],
+#       "Resource": "*"
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "ec2:CreateNetworkInterfacePermission"
+#       ],
+#       "Resource": [
+#         "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*"
+#       ],
+#       "Condition": {
+#         "StringEquals": {
+#           "ec2:Subnet": ${local.public_subnet_arns},
+#           "ec2:AuthorizedService": "codebuild.amazonaws.com"
+#         }
+#       }
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "s3:*"
+#       ],
+#       "Resource": [
+#         "${aws_s3_bucket.deployer_cache.arn}",
+#         "${aws_s3_bucket.deployer_cache.arn}/*"
+#       ]
+#     }
+#   ]
+# }
+# POLICY
+# }
 
 resource "aws_codebuild_project" "firehawk_deployer" {
   name                   = "firehawk-deployer"
