@@ -264,8 +264,8 @@ function options { # Not all defaults are available as args, however the script 
   local sub_script="true"
   local skip_find_amis="false"
   local verbose="false"
-  local codebuild="false"
-  local resourcetier=""
+  local codebuild="true"
+  local resourcetier="$DEFAULT_TF_VAR_resourcetier"
   local user_var="$USER"
   if [[ -z "$user_var" ]]; then
     user_var="root"
@@ -291,9 +291,9 @@ function options { # Not all defaults are available as args, however the script 
       --verbose)
         verbose="true"
         ;;
-      --codebuild)
-        codebuild="true"
-        ;;
+      # --codebuild)
+      #   codebuild="true"
+      #   ;;
       --resourcetier)
         resourcetier="$2"
         shift
