@@ -153,73 +153,73 @@ resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
 POLICY
 }
 
-# resource "aws_codebuild_project" "firehawk_deployer" {
-#   name          = "firehawk-deployer"
-#   description   = "firehawk_deployer_project"
-#   build_timeout = "5"
-#   service_role  = aws_iam_role.firehawk_codebuild_deployer_role.arn
+resource "aws_codebuild_project" "firehawk_deployer" {
+  name          = "firehawk-deployer"
+  description   = "firehawk_deployer_project"
+  build_timeout = "5"
+  service_role  = aws_iam_role.firehawk_codebuild_deployer_role.arn
 
-#   artifacts {
-#     type = "NO_ARTIFACTS"
-#   }
+  artifacts {
+    type = "NO_ARTIFACTS"
+  }
 
-#   cache {
-#     type     = "S3"
-#     location = aws_s3_bucket.deployer_cache.bucket
-#   }
+  cache {
+    type     = "S3"
+    location = aws_s3_bucket.deployer_cache.bucket
+  }
 
-#   environment {
-#     compute_type                = "BUILD_GENERAL1_SMALL"
-#     image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
-#     # type                        = "LINUX_CONTAINER"
-#     image_pull_credentials_type = "CODEBUILD"
+  environment {
+    compute_type                = "BUILD_GENERAL1_SMALL"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+    # type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
 
-#     # environment_variable {
-#     #   name  = "SOME_KEY1"
-#     #   value = "SOME_VALUE1"
-#     # }
+    # environment_variable {
+    #   name  = "SOME_KEY1"
+    #   value = "SOME_VALUE1"
+    # }
 
-#     # environment_variable {
-#     #   name  = "SOME_KEY2"
-#     #   value = "SOME_VALUE2"
-#     #   type  = "PARAMETER_STORE"
-#     # }
-#   }
+    # environment_variable {
+    #   name  = "SOME_KEY2"
+    #   value = "SOME_VALUE2"
+    #   type  = "PARAMETER_STORE"
+    # }
+  }
 
-#   logs_config {
-#     cloudwatch_logs {
-#       group_name  = "firehawk-deploy"
-#       # stream_name = "log-stream"
-#     }
-#   }
+  logs_config {
+    cloudwatch_logs {
+      group_name  = "firehawk-deploy"
+      # stream_name = "log-stream"
+    }
+  }
 
-#   source {
-#     type            = "GITHUB"
-#     location        = "https://github.com/firehawkvfx/firehawk.git"
-#     git_clone_depth = 1
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/firehawkvfx/firehawk.git"
+    git_clone_depth = 1
 
-#     git_submodules_config {
-#       fetch_submodules = false
-#     }
-#   }
+    git_submodules_config {
+      fetch_submodules = false
+    }
+  }
 
-#   source_version = "dev"
+  source_version = "dev"
 
-#   vpc_config {
-#     vpc_id = data.aws_vpc.primary.id
+  vpc_config {
+    vpc_id = data.aws_vpc.primary.id
 
-#     subnets = data.aws_subnet_ids.public.ids
+    subnets = data.aws_subnet_ids.public.ids
 
-#     # security_group_ids = [
-#     #   aws_security_group.example1.id,
-#     #   aws_security_group.example2.id,
-#     # ]
-#   }
+    # security_group_ids = [
+    #   aws_security_group.example1.id,
+    #   aws_security_group.example2.id,
+    # ]
+  }
 
-#   # tags = {
-#   #   Environment = "Test"
-#   # }
-# }
+  # tags = {
+  #   Environment = "Test"
+  # }
+}
 
 
 # variable "vpc_id" {}
