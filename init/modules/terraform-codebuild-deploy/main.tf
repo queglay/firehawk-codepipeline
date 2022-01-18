@@ -91,66 +91,66 @@ resource "aws_iam_role" "firehawk_codebuild_deployer_role" {
 EOF
 }
 
-# resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
-#   role = aws_iam_role.firehawk_codebuild_deployer_role.name
+resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
+  role = aws_iam_role.firehawk_codebuild_deployer_role.name
 
-#   policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Resource": [
-#         "*"
-#       ],
-#       "Action": [
-#         "logs:CreateLogGroup",
-#         "logs:CreateLogStream",
-#         "logs:PutLogEvents"
-#       ]
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "ec2:CreateNetworkInterface",
-#         "ec2:DescribeDhcpOptions",
-#         "ec2:DescribeNetworkInterfaces",
-#         "ec2:DeleteNetworkInterface",
-#         "ec2:DescribeSubnets",
-#         "ec2:DescribeSecurityGroups",
-#         "ec2:DescribeVpcs"
-#       ],
-#       "Resource": "*"
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "ec2:CreateNetworkInterfacePermission"
-#       ],
-#       "Resource": [
-#         "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*"
-#       ],
-#       "Condition": {
-#         "StringEquals": {
-#           "ec2:Subnet": "${local.public_subnet_arns}",
-#           "ec2:AuthorizedService": "codebuild.amazonaws.com"
-#         }
-#       }
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "s3:*"
-#       ],
-#       "Resource": [
-#         "${aws_s3_bucket.deployer_cache.arn}",
-#         "${aws_s3_bucket.deployer_cache.arn}/*"
-#       ]
-#     }
-#   ]
-# }
-# POLICY
-# }
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ],
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeDhcpOptions",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeVpcs"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateNetworkInterfacePermission"
+      ],
+      "Resource": [
+        "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "ec2:Subnet": ${local.public_subnet_arns},
+          "ec2:AuthorizedService": "codebuild.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "${aws_s3_bucket.deployer_cache.arn}",
+        "${aws_s3_bucket.deployer_cache.arn}/*"
+      ]
+    }
+  ]
+}
+POLICY
+}
 
 # resource "aws_codebuild_project" "firehawk_deployer" {
 #   name          = "firehawk-deployer"
