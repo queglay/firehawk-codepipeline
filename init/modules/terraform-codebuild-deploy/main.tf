@@ -303,7 +303,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
     environment_variable {
       name  = "TF_VAR_deployer_sg_id"
-      value = "${aws_security_group.codebuild_deployer.id}"
+      value = aws_security_group.codebuild_deployer.id
     }
 
     # environment_variable {
