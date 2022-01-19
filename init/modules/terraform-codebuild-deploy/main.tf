@@ -335,7 +335,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
   vpc_config {
     vpc_id = data.aws_vpc.primary.id
 
-    subnets = data.aws_subnet_ids.public.ids
+    subnets = data.aws_subnet_ids.private.ids
 
     security_group_ids = [
       aws_security_group.codebuild_deployer.id
