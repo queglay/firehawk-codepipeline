@@ -301,10 +301,10 @@ resource "aws_codebuild_project" "firehawk_deployer" {
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
-    # environment_variable {
-    #   name  = "SOME_KEY1"
-    #   value = "SOME_VALUE1"
-    # }
+    environment_variable {
+      name  = "TF_VAR_deployer_sg_id"
+      value = "${aws_security_group.codebuild_deployer.id}"
+    }
 
     # environment_variable {
     #   name  = "SOME_KEY2"
