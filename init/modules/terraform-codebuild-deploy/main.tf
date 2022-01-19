@@ -283,7 +283,7 @@ resource "aws_codebuild_webhook" "git_push" {
 resource "aws_codebuild_project" "firehawk_deployer" {
   name                   = "firehawk-deployer"
   description            = "firehawk_deployer_project"
-  build_timeout          = "5"
+  build_timeout          = "90"
   service_role           = aws_iam_role.firehawk_codebuild_deployer_role.arn
   concurrent_build_limit = 1
   artifacts {
