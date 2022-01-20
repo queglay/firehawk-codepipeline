@@ -56,6 +56,7 @@ locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
+  log_group = "firehawk-deploy"
 }
 
 resource "aws_security_group" "codebuild_deployer" {
@@ -120,6 +121,34 @@ resource "aws_iam_role_policy" "codebuild_service_role_policy" {
             "Effect": "Allow",
             "Action": "kms:*",
             "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "logs:DescribeLogGroups",
+              "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*:*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.log_group}:*"
+            }
+          ]
         },
         {
             "Effect": "Allow",
@@ -315,7 +344,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
   logs_config {
     cloudwatch_logs {
-      # group_name = "firehawk-deploy"
+      group_name = "${local.log_group}"
       # stream_name = "log-stream"
     }
   }
