@@ -330,11 +330,10 @@ resource "aws_codebuild_project" "firehawk_deployer" {
       value = aws_security_group.codebuild_deployer.id
     }
 
-    # environment_variable {
-    #   name  = "SOME_KEY2"
-    #   value = "SOME_VALUE2"
-    #   type  = "PARAMETER_STORE"
-    # }
+    environment_variable {
+      name  = "TF_VAR_vpc_id_main_cloud9"
+      value = data.aws_vpc.primary.id
+    }
   }
 
   logs_config {
