@@ -75,7 +75,7 @@ resource "aws_security_group" "codebuild_deployer" {
 }
 
 resource "aws_security_group" "cloud9_to_vault" {
-  name        = "consul_client_cloud9_vpc_${var.resourcetier}${var.pipelineid}"
+  name        = "consul_client_cloud9_vpc_${var.resourcetier}"
   description = "Security group for Cloud 9 access to Consul and Vault"
   vpc_id      = data.aws_vpc.primary.id
 }
