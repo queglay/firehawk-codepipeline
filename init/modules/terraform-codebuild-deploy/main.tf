@@ -327,7 +327,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/public.ecr.aws/n0r4f8d0/test-repo:latest"
+    image                       = "public.ecr.aws/n0r4f8d0/test-repo"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
