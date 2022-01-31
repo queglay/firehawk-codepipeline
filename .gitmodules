@@ -2,5 +2,5 @@
 	path = init/modules/codedeploy-app-firehawk
 	url = https://github.com/firehawkvfx/codedeploy-app-firehawk.git
 [submodule "init/modules/firehawk"]
-	path = init/modules/firehawk
+	path = app/modules/firehawk
 	url = https://github.com/firehawkvfx/firehawk.git
