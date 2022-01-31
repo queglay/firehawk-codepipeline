@@ -7,3 +7,4 @@ modules/terraform-aws-iam-profile-vault-client/s3-backend.tf
 **/.terragrunt-cache/
 **/.terraform.lock.hcl
 tests/backup
+init/modules/codedeploy-app-firehawk.zip
