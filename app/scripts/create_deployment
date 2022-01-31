@@ -2,11 +2,13 @@
 
 set -e -x
 
+EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
-zip -r $SCRIPTDIR/codedeploy-app-firehawk.zip $SCRIPTDIR/../modules/firehawk/*
+cd SCRIPTDIR/../modules
+zip -r codedeploy-app-firehawk.zip firehawk/*
 
-aws s3 cp $SCRIPTDIR/codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
+aws s3 cp codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
 
 aws deploy create-deployment \
   --application-name firehawk-codedeploy-app \
@@ -14,3 +16,5 @@ aws deploy create-deployment \
   --deployment-group-name firehawk-deployment-group \
   --description "Firehawk deployment" \
   --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip
+
+cd $EXECDIR
