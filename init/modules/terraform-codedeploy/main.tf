@@ -35,10 +35,10 @@ resource "aws_sns_topic" "firehawk_sns_topic" {
 resource "aws_codedeploy_deployment_config" "firehawk_deployment_config" {
   deployment_config_name = "firehawk-deployment-config"
 
-#   minimum_healthy_hosts {
-#     type  = "HOST_COUNT"
-#     value = 2
-#   }
+  minimum_healthy_hosts {
+    type  = "HOST_COUNT"
+    value = 1
+  }
 }
 
 resource "aws_codedeploy_deployment_group" "firehawk_deployment_group" {

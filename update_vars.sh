@@ -4,9 +4,9 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 
 DEFAULT_LATEST_AMI="false"
 
-if [[ -f "$SCRIPTDIR/default_vars" ]]; then
-  echo "Sourcing: $SCRIPTDIR/default_vars:"
-  source "$SCRIPTDIR/default_vars"
+if [[ -f "$HOME/default_vars" ]]; then
+  echo "Sourcing: $HOME/default_vars:"
+  source "$HOME/default_vars"
 fi
 
 to_abs_path() {
