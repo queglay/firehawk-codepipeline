@@ -4,7 +4,7 @@ set -e -x
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
-zip -r $SCRIPTDIR/codedeploy-app-firehawk.zip $SCRIPTDIR/modules/firehawk/*
+zip -r $SCRIPTDIR/codedeploy-app-firehawk.zip $SCRIPTDIR/../modules/firehawk/*
 
 aws s3 cp $SCRIPTDIR/codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
 
