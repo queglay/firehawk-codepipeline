@@ -16,7 +16,7 @@ git pull origin
 ./gitpullrecursive --init-all
 
 
-sudo mkdir $targetdir
+sudo mkdir -p $targetdir
 sudo chown $USER $targetdir
 sudo cp -fr $SCRIPTDIR $targetdir/.
 cd $targetdir/$dirname
