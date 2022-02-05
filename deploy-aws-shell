@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# defaults
+resourcetier="dev"
+
+set -e
+
+aws sts get-caller-identity
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+cd $SCRIPTDIR
+dirname=${SCRIPTDIR##*/}
+cp -fr $SCRIPTDIR /aws/mde/.
+cd /aws/mde/$dirname
+
+./install-packages
+source ./update_vars.sh --resourcetier $resourcetier
+./init/init
