@@ -13,6 +13,7 @@ dirname=${SCRIPTDIR##*/}
 cp -fr $SCRIPTDIR /aws/mde/.
 cd /aws/mde/$dirname
 
+./gitpullrecursive --init-all
 ./install-packages
 source ./update_vars.sh --resourcetier $resourcetier
 ./init/init
