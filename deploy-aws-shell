@@ -18,7 +18,7 @@ git pull origin
 sudo mkdir -p $targetdir
 sudo chown $USER:$USER $targetdir
 sudo chmod +rwX $targetdir
-cp -fr $SCRIPTDIR $targetdir/.
+cp -fr . /aws/mde/tmp/.
 cd $targetdir/$dirname
 
 ./install-packages
