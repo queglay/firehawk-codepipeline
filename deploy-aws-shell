@@ -13,7 +13,7 @@ dirname=${SCRIPTDIR##*/}
 
 ./gitpullrecursive --init-all
 
-mkdir /aws/mde/tmp
+sudo mkdir /aws/mde/tmp
 sudo chown $USER /aws/mde/tmp
 sudo cp -fr $SCRIPTDIR /aws/mde/.
 cd /aws/mde/$dirname
