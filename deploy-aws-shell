@@ -2,6 +2,7 @@
 
 # defaults
 resourcetier="dev"
+targetdir="/aws/mde/tmp"
 
 set -e
 
@@ -11,12 +12,14 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 dirname=${SCRIPTDIR##*/}
 
+git pull origin
 ./gitpullrecursive --init-all
 
-sudo mkdir /aws/mde/tmp
-sudo chown $USER /aws/mde/tmp
-sudo cp -fr $SCRIPTDIR /aws/mde/.
-cd /aws/mde/$dirname
+
+sudo mkdir $targetdir
+sudo chown $USER $targetdir
+sudo cp -fr $SCRIPTDIR $targetdir/.
+cd $targetdir/$dirname
 
 ./install-packages
 source ./update_vars.sh --resourcetier $resourcetier
