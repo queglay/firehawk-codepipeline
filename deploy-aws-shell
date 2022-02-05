@@ -15,9 +15,9 @@ dirname=${SCRIPTDIR##*/}
 git pull origin
 ./gitpullrecursive --init-all
 
-
 sudo mkdir -p $targetdir
-sudo chown $USER $targetdir
+sudo chown $USER:$USER $targetdir
+sudo chmod +rwX $targetdir
 sudo cp -fr $SCRIPTDIR $targetdir/.
 cd $targetdir/$dirname
 
