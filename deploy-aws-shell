@@ -10,7 +10,7 @@ aws sts get-caller-identity
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
 dirname=${SCRIPTDIR##*/}
-cp -fr $SCRIPTDIR /aws/mde/.
+sudo cp -fr $SCRIPTDIR /aws/mde/.
 cd /aws/mde/$dirname
 
 ./gitpullrecursive --init-all
