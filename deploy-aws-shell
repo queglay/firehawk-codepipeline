@@ -4,7 +4,6 @@
 resourcetier="dev"
 
 set -e
-set -x
 
 aws sts get-caller-identity
 
@@ -27,7 +26,10 @@ git pull origin
 sudo mkdir -p $targetdir
 sudo chown $USER:$USER $targetdir
 sudo chmod +rwX $targetdir
-cp -fr $SCRIPTDIR /aws/mde/tmp/.
+if [[ -d "$targetdir/$dirname" ]]; then
+  rm -fr "$targetdir/$dirname"
+fi
+cp -fr $SCRIPTDIR $targetdir/.
 cd $targetdir/$dirname
 
 ./install-packages

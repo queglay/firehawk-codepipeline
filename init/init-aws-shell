@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # init will deploy vault only and ensure it is initialised.
-set -x
 
 EXECDIR="$(pwd)"
 
