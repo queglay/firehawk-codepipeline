@@ -10,6 +10,10 @@ output "public_subnets" {
 #   value = module.consul_client_security_group.consul_client_sg_id
 # }
 
+output "vpc_cidr" {
+  value = module.deployervpc_all_subnet_cidrs.base_cidr_block
+}
+
 output "resourcetier_all_vpc_cidrs" {
   value = module.resourcetier_all_vpc_cidrs.network_cidr_blocks
 }
