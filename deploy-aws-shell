@@ -12,6 +12,7 @@ cd $SCRIPTDIR
 dirname=${SCRIPTDIR##*/}
 targetdir="/aws/mde/tmp"
 
+echo "pwd: $PWD"
 git pull origin
 ./gitpullrecursive --init-all
 
