@@ -1,5 +1,8 @@
 #!/bin/bash
 
+terraform_version="0.13.7"
+terragrunt_version="0.30.3"
+
 set -e
 # set -x
 
@@ -17,13 +20,21 @@ $SUDOCMD yum install -y python3-pip # for a specific python version - https://re
 $SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
 
-wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip -P /tmp/ --quiet # Get terraform
-$SUDOCMD unzip /tmp/terraform_0.13.7_linux_amd64.zip -d /tmp/
-$SUDOCMD mv /tmp/terraform /usr/local/bin/.
+if terraform --version | grep -nq "Terraform v$terraform_version"; then
+    echo 'terraform already installed'
+else
+    wget https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip -P /tmp/ --quiet # Get terraform
+    $SUDOCMD unzip /tmp/terraform_${terraform_version}_linux_amd64.zip -d /tmp/
+    $SUDOCMD mv /tmp/terraform /usr/local/bin/.
+fi
 
-wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ --quiet # Get Terragrunt
-$SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
-$SUDOCMD chmod +x /usr/local/bin/terragrunt
+if terragrunt --version | grep -nq "terragrunt version v$terragrunt_version"; then
+    echo 'Terragrunt already installed'
+else
+    wget https://github.com/gruntwork-io/terragrunt/releases/download/v$terragrunt_version/terragrunt_linux_386 -P /tmp/ --quiet # Get Terragrunt
+    $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
+    $SUDOCMD chmod +x /usr/local/bin/terragrunt
+fi
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
