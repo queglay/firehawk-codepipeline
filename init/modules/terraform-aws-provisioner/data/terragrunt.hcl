@@ -12,6 +12,6 @@ dependencies {
   paths = [
     "../../vpc",
     "../../terraform-aws-sg-provisioner",
-    "../../terraform-aws-iam-profile-provisioner"
+    "../../firehawk-main/modules/terraform-aws-iam-profile-provisioner"
     ]
 }
