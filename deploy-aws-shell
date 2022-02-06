@@ -4,6 +4,7 @@
 resourcetier="dev"
 
 set -e
+set -x
 
 aws sts get-caller-identity
 
