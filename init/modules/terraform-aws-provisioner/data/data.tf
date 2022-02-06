@@ -11,3 +11,8 @@ data "aws_vpc" "primary" {
   default = false
   tags    = local.common_tags
 }
+
+data "aws_subnet_ids" "public" {
+  vpc_id = data.aws_vpc.primary.id
+  tags   = map("area", "public")
+}
