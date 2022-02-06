@@ -66,10 +66,10 @@ function retrieve_ami {
   local ami_result="null"
   if [[ "$latest_ami" == true ]]; then
     ami_filters="Name=tag:ami_role,Values=$ami_role"
-    # printf "\n...Query latest AMI"
+    printf "\n...Query latest AMI"
   else
     ami_filters="Name=tag:ami_role,Values=$ami_role Name=tag:commit_hash,Values=$ami_commit_hash"
-    # printf "\n...Query AMI with commit: $ami_commit_hash"
+    printf "\n...Query AMI with commit: $ami_commit_hash"
   fi
   # this query by aws will return null presently if invalid
   ami_result=$(aws ec2 describe-images --filters $ami_filters --owners self --region $AWS_DEFAULT_REGION --query 'sort_by(Images, &CreationDate)[].ImageId' --output json | jq '.[-1]' --raw-output)

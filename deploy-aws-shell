@@ -26,7 +26,7 @@ git pull origin
 sudo mkdir -p $targetdir
 sudo chown $USER:$USER $targetdir
 sudo chmod +rwX $targetdir
-if [[ -d "$targetdir/$dirname" ]]; then
+if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
   rm -fr "$targetdir/$dirname"
 fi
 cp -fr $SCRIPTDIR $targetdir/.
