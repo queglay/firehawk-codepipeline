@@ -176,6 +176,16 @@ function export_vars {
 
   ### Query existance of images required for deployment of instances.  Some parts of infrastructure can be deployed without images
 
+  export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)" 
+
+  if [[ "$skip_find_amis" == "false" ]]; then
+
+    # AMI query by commit - Workstation
+    ami_role="firehawk_amazonlinux2_ami"
+    export TF_VAR_provisioner_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
+    warn_if_invalid "$ami_role" "$TF_VAR_provisioner_ami_id" "TF_VAR_provisioner_ami_id"
+  fi
+
   # Terraform Vars
   export TF_VAR_general_use_ssh_key="$HOME/.ssh/id_rsa" # For debugging deployment of most resources- not for production use.
   export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
