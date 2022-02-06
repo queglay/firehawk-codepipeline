@@ -24,4 +24,4 @@ cd $targetdir/$dirname
 
 ./install-packages
 source ./update_vars.sh --resourcetier $resourcetier
-./init/init
+./init/init-aws-shell
