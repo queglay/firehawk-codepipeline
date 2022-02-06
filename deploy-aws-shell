@@ -3,7 +3,6 @@
 # defaults
 resourcetier="dev"
 
-
 set -e
 
 aws sts get-caller-identity
