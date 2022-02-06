@@ -18,8 +18,8 @@ module "vpc" {
   private_subnets              = module.deployervpc_all_private_subnet_cidrs.networks[*].cidr_block
   sleep                        = var.sleep
   # deployer_ip_cidr             = var.deployer_ip_cidr
-  remote_cloud_public_ip_cidr  = var.remote_cloud_public_ip_cidr
-  remote_cloud_private_ip_cidr = var.remote_cloud_private_ip_cidr
+  # remote_cloud_public_ip_cidr  = var.remote_cloud_public_ip_cidr
+  # remote_cloud_private_ip_cidr = var.remote_cloud_private_ip_cidr
   common_tags                  = local.common_tags
 }
 
