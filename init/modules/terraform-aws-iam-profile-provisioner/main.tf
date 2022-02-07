@@ -40,14 +40,16 @@ module "consul_iam_policies_for_client" {
   source = "github.com/hashicorp/terraform-aws-consul.git//modules/consul-iam-policies?ref=v0.7.7"
   iam_role_id = aws_iam_role.instance_role.id
 }
-
 module "iam_policies_ssm_manage_channels" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-ssm-manage-channels?ref=v0.0.25"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-ssm-manage-channels?ref=v0.0.26"
   name = "SSMManageChannels_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
-
-
+module "iam_policies_provisioner_firehawk" {
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-provisioner-firehawk?ref=v0.0.26"
+  name = "ProvisionerFirehawk_${var.conflictkey}"
+  iam_role_id = aws_iam_role.instance_role.id
+}
 
 
 # resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
