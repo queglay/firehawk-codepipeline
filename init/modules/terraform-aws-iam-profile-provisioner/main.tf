@@ -46,13 +46,7 @@ module "iam_policies_ssm_manage_channels" {
   iam_role_id = aws_iam_role.instance_role.id
 }
 module "iam_policies_provisioner_firehawk" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-provisioner-firehawk?ref=v0.0.26"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-provisioner-firehawk?ref=v0.0.28"
   name = "ProvisionerFirehawk_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
-
-
-# resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
-#   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-#   role       = aws_iam_role.instance_role.name
-# }
