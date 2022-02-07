@@ -3,6 +3,9 @@ resource "aws_iam_role" "instance_role" {
   name = var.provisioner_iam_profile_name
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   tags = merge( var.common_tags, map( "role", "provisioner") )
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/IAMFullAccess"
+  ]
 }
 resource "aws_iam_instance_profile" "instance_profile" {
   name = aws_iam_role.instance_role.name
@@ -37,7 +40,7 @@ module "consul_iam_policies_for_client" {
   iam_role_id = aws_iam_role.instance_role.id
 }
 
-resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
-  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-  role       = aws_iam_role.instance_role.name
-}
+# resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
+#   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+#   role       = aws_iam_role.instance_role.name
+# }
