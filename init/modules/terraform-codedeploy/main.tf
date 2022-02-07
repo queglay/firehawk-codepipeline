@@ -51,7 +51,7 @@ resource "aws_codedeploy_deployment_group" "firehawk_deployment_group" {
     ec2_tag_filter {
       key   = "deployment_group"
       type  = "KEY_AND_VALUE"
-      value = "firehawk-test-deploy-group"
+      value = "firehawk-provisioner-deploy-group"
     }
 
     # ec2_tag_filter {

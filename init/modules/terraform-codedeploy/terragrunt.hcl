@@ -10,6 +10,7 @@ inputs = local.common_vars.inputs
 
 dependencies {
   paths = [
-    "../vpc"
+    "../vpc",
+    "../../terraform-aws-provisioner/terraform-aws-provisioner-instance"
     ]
 }

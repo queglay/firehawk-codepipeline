@@ -21,6 +21,7 @@ locals {
     name  = var.name
     role  = "provisioner"
     route = "public"
+    deployment_group = "firehawk-provisioner-deploy-group"
   })
   public_ip       = element(concat(aws_instance.provisioner.*.public_ip, list("")), 0)
   private_ip      = element(concat(aws_instance.provisioner.*.private_ip, list("")), 0)
