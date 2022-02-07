@@ -1,6 +1,10 @@
 #!/bin/bash
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+export TF_VAR_firehawk_path="$SCRIPTDIR/app/modules/firehawk/deploy/firehawk-main/" # the path of the firehawk-main folder
+export TF_VAR_firehawk_ami_path="$TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami"
+
+
 
 DEFAULT_LATEST_AMI="false"
 
@@ -105,6 +109,15 @@ function export_vars {
     echo "Enabled verbose mode"
     set -x
   fi
+
+  # Test path existance
+  if [[ ! -d "$TF_VAR_firehawk_path" ]]; then
+    log_error "Path does not exist for TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
+  fi
+  if [[ ! -d "$TF_VAR_firehawk_ami_path" ]]; then
+    log_error "Path does not exist for TF_VAR_firehawk_ami_path: $TF_VAR_firehawk_ami_path"
+  fi
+  
   # Region is required for AWS CLI
   echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
@@ -161,7 +174,6 @@ function export_vars {
   else
     export TF_VAR_environment="prod"
   fi
-  export TF_VAR_firehawk_path="$SCRIPTDIR/deploy/firehawk-main"
 
   # Packer Vars
   export TF_VAR_deadline_version="10.1.18.5"
@@ -176,7 +188,7 @@ function export_vars {
 
   ### Query existance of images required for deployment of instances.  Some parts of infrastructure can be deployed without images
 
-  export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)" 
+  export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_ami_path; git rev-parse HEAD)" 
 
   if [[ "$skip_find_amis" == "false" ]]; then
 
