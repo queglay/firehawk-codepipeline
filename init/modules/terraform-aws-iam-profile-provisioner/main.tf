@@ -4,7 +4,9 @@ resource "aws_iam_role" "instance_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   tags = merge( var.common_tags, map( "role", "provisioner") )
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/IAMFullAccess"
+    "arn:aws:iam::aws:policy/IAMFullAccess",
+    "arn:aws:iam::aws:policy/AdministratorAccess",
+    "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
   ]
 }
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -36,9 +38,17 @@ module "iam_policies_get_caller_identity" {
 # Adds policies necessary for running Consul
 module "consul_iam_policies_for_client" {
   source = "github.com/hashicorp/terraform-aws-consul.git//modules/consul-iam-policies?ref=v0.7.7"
-
   iam_role_id = aws_iam_role.instance_role.id
 }
+
+module "iam_policies_get_caller_identity" {
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-ssm-manage-channels?ref=v0.0.25"
+  name = "SSMManageChannels_${var.conflictkey}"
+  iam_role_id = aws_iam_role.instance_role.id
+}
+
+
+
 
 # resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
 #   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
