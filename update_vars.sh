@@ -195,7 +195,6 @@ function export_vars {
     # AMI query by commit - Workstation
     ami_role="firehawk_amazonlinux2_ami"
     export TF_VAR_provisioner_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-    echo "$TF_VAR_provisioner_ami_id: $TF_VAR_provisioner_ami_id"
     warn_if_invalid "$ami_role" "$TF_VAR_provisioner_ami_id" "TF_VAR_provisioner_ami_id"
   fi
 
