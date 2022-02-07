@@ -36,3 +36,8 @@ module "consul_iam_policies_for_client" {
 
   iam_role_id = aws_iam_role.instance_role.id
 }
+
+resource "aws_iam_role_policy_attachment" "IAMFullAccess" {
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+  role       = aws_iam_role.instance_role.name
+}
