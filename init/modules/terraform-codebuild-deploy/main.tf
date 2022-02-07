@@ -56,7 +56,7 @@ locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
-  log_group = "firehawk-deploy"
+  log_group = "firehawk-codebuild-ami"
 }
 
 resource "aws_security_group" "codebuild_deployer" {
