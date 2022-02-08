@@ -8,10 +8,10 @@ locals {
 
 inputs = local.common_vars.inputs
 
-dependencies {
-  paths = [
-    "../../vpc",
-    "../../terraform-aws-sg-provisioner",
-    "../../terraform-aws-iam-profile-provisioner"
-    ]
-}
+# dependencies {
+#   paths = [
+#     "../../vpc",
+#     "../../terraform-aws-sg-provisioner",
+#     "../../terraform-aws-iam-profile-provisioner"
+#     ]
+# }
