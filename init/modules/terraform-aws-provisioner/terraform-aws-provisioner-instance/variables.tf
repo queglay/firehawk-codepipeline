@@ -55,7 +55,7 @@ variable "aws_key_name" {
 variable "instance_type" {
   description = "The AWS instance type to use."
   type        = string
-  default     = "t3.micro"
+  default     = "m5.large"
 }
 variable "node_skip_update" {
   description = "Skipping node updates is not recommended, but it is available to speed up deployment tests when diagnosing problems"
