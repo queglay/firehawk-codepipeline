@@ -1,3 +1,4 @@
+provider "aws" {}
 resource "aws_iam_role" "firehawk_role" {
   name = "FirehawkCodeDeployRole"
 
