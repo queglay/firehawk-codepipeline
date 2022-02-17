@@ -198,7 +198,7 @@ function export_vars {
 
   if [[ "$skip_find_amis" == "false" ]]; then
 
-    # AMI query by commit - Workstation
+    # AMI query by commit - deployer
     ami_role="firehawk_amazonlinux2_ami"
     export TF_VAR_provisioner_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
     warn_if_invalid "$ami_role" "$TF_VAR_provisioner_ami_id" "TF_VAR_provisioner_ami_id"
