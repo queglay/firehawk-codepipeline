@@ -87,6 +87,10 @@ variable "bucket_extension" {
 
 resource "aws_s3_bucket" "deployer_cache" {
   bucket = "deployer-cache.${var.bucket_extension}"
+}
+
+resource "aws_s3_bucket_acl" "acl_config" {
+  bucket = aws_s3_bucket.deployer_cache.id
   acl    = "private"
 }
 
