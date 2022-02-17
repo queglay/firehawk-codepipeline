@@ -12,7 +12,7 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd ) # The directory of this script
 
 cd $SCRIPTDIR/../modules
-zip -r codedeploy-app-firehawk.zip firehawk/*
+zip -r codedeploy-app-firehawk.zip firehawk/??*
 
 aws s3 cp codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
 
