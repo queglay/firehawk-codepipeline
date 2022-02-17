@@ -81,7 +81,7 @@ function retrieve_ami {
 
 rm -fr $SCRIPTDIR/../modules/firehawk/env_vars.sh
 export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_ami_path; git rev-parse HEAD)"
-echo "TF_VAR_ami_commit_hash=$TF_VAR_ami_commit_hash" >> $SCRIPTDIR/../modules/firehawk/env_vars.sh
+echo "TF_VAR_ami_commit_hash=$TF_VAR_ami_commit_hash" 2>&1 | tee $SCRIPTDIR/../modules/firehawk/env_vars.sh
 # output image id's
 # These ami's are required for a full deployment
 # AMI query by commit - Vault and Consul Server
