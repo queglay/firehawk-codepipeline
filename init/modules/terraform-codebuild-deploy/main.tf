@@ -313,7 +313,7 @@ resource "aws_codebuild_webhook" "git_push" {
 
     filter {
       type    = "HEAD_REF"
-      pattern = "dev"
+      pattern = "main"
     }
   }
 }
