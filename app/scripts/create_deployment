@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -x
+set -e
 
 EXECDIR="$(pwd)"
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
@@ -55,6 +55,7 @@ function warn_if_invalid {
     printf "$var_name"
     printf "\n  Found role $ami_role result:"
     printf "\n  $ami_result\n\n"
+    echo "$var_name=$ami_result" >> $TF_VAR_firehawk_path/env_vars
   fi
 }
 
@@ -76,6 +77,8 @@ function retrieve_ami {
 
   echo "$ami_result"
 }
+
+rm -fr $TF_VAR_firehawk_path/env_vars
 
 export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_ami_path; git rev-parse HEAD)" 
 # output image id's
