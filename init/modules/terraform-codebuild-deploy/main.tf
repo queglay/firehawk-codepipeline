@@ -364,7 +364,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/firehawkvfx/firehawk.git"
+    location        = "https://github.com/firehawkvfx/packer-firehawk-amis.git"
     git_clone_depth = 1
 
     git_submodules_config {
@@ -372,7 +372,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
     }
   }
 
-  source_version = "dev"
+  source_version = "main"
 
   vpc_config {
     vpc_id = data.aws_vpc.primary.id
