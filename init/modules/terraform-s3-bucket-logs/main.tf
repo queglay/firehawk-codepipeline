@@ -13,6 +13,10 @@ locals {
 
 resource "aws_s3_bucket" "log_bucket" {
   bucket = local.bucket_name
+}
+
+resource "aws_s3_bucket_acl" "acl_config" {
+  bucket = aws_s3_bucket.log_bucket.id
   acl    = "log-delivery-write"
 }
 
