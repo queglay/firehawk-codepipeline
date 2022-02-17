@@ -14,15 +14,21 @@ locals {
 resource "aws_s3_bucket" "log_bucket" {
   bucket = local.bucket_name
   acl    = "log-delivery-write"
-  versioning {
-    enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "versioning_config" {
+  bucket = aws_s3_bucket.log_bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
-  # Enable server-side encryption by default
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_config" {
+  bucket = aws_s3_bucket.log_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
 }
