@@ -11,7 +11,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd ) # The directory of this script
 export TF_VAR_firehawk_path="$SCRIPTDIR/../modules/firehawk/deploy/firehawk-main/" # the path of the firehawk-main folder
-export TF_VAR_firehawk_ami_path="$TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami"
+export TF_VAR_firehawk_ami_path="$SCRIPTDIR/../modules/firehawk/deploy/packer-firehawk-amis/modules/firehawk-ami"
 echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
 
 function log {
