@@ -21,7 +21,7 @@ locals {
     accountid  = data.aws_caller_identity.current.account_id
     region     = data.aws_region.current.name
     terraform  = "true"
-    role = "deadline license forwarder"
+    role       = "deadline license forwarder"
   }
 }
 
@@ -30,7 +30,7 @@ locals {
 resource "aws_s3_bucket" "license_forwarder_cert_bucket" {
   bucket = local.bucket_name
   tags = merge(
-    {"description" = "Used for Terraform remote state configuration. DO NOT DELETE this Bucket unless you know what you are doing."},
+    { "description" = "Used for Terraform remote state configuration. DO NOT DELETE this Bucket unless you know what you are doing." },
     local.common_tags,
   )
 }
@@ -55,15 +55,15 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_config
 }
 
 resource "aws_s3_object" "base_folder" {
-  bucket  = aws_s3_bucket.license_forwarder_cert_bucket.id
-  acl     = "private"
-  key     =  "ublcertszip/"
+  bucket       = aws_s3_bucket.license_forwarder_cert_bucket.id
+  acl          = "private"
+  key          = "ublcertszip/"
   content_type = "application/x-directory"
 }
 
 resource "aws_s3_bucket_public_access_block" "backend" { # https://medium.com/dnx-labs/terraform-remote-states-in-s3-d74edd24a2c4
   depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
-  bucket = aws_s3_bucket.license_forwarder_cert_bucket.id
+  bucket     = aws_s3_bucket.license_forwarder_cert_bucket.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -81,17 +81,19 @@ data "terraform_remote_state" "deadline_db_profile" { # The deadline DB instance
 }
 
 module "iam_policies_s3_license_forwarder_certs_bucket" { # policy for the bucket allowing access by the role
-  source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-license-forwarder-certs-bucket"
-  depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
-  bucket_name = local.bucket_name
+  # source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-license-forwarder-certs-bucket"
+  source                 = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-license-forwarder-certs-bucket?ref=v0.0.28"
+  depends_on             = [aws_s3_bucket.license_forwarder_cert_bucket]
+  bucket_name            = local.bucket_name
   multi_account_role_arn = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_arn
 }
 
 module "iam_policies_s3_multi_account_role" { # Define policy for the role allowing access to the bucket.
-  source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-multi-account-role"
-  depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
-  name = "MultiAccountRolePolicyS3BucketDeadlineLicenseForwarderAccess_${var.conflictkey}"
-  iam_role_id = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_id
+  # source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-multi-account-role"
+  source            = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-multi-account-role?ref=v0.0.28"
+  depends_on        = [aws_s3_bucket.license_forwarder_cert_bucket]
+  name              = "MultiAccountRolePolicyS3BucketDeadlineLicenseForwarderAccess_${var.conflictkey}"
+  iam_role_id       = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_id
   shared_bucket_arn = aws_s3_bucket.license_forwarder_cert_bucket.arn
 }
 
