@@ -25,14 +25,26 @@ module "security_group_rules" {
   security_group_id = local.security_group_id
 }
 
-resource "aws_security_group_rule" "allow_inbound" {
+# resource "aws_security_group_rule" "allow_inbound" {
+#   count       = var.create_vpc ? 1 : 0
+#   type        = "ingress"
+#   from_port   = "0"
+#   to_port     = "0"
+#   protocol    = "-1"
+#   cidr_blocks = ["0.0.0.0/0"]
+#   description = "all incoming traffic"
+
+#   security_group_id = local.security_group_id
+# }
+
+resource "aws_security_group_rule" "allow_outbound" {
   count       = var.create_vpc ? 1 : 0
-  type        = "ingress"
+  type        = "egress"
   from_port   = "0"
   to_port     = "0"
   protocol    = "-1"
   cidr_blocks = ["0.0.0.0/0"]
-  description = "all incoming traffic"
+  description = "all outgoing traffic"
 
   security_group_id = local.security_group_id
 }
