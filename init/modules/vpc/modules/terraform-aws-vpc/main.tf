@@ -100,7 +100,7 @@ resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to sav
 resource "aws_route_table" "private" {
   count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "private"}), map("Name", "${local.name}_private"))
+  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "private"}), tomap("Name", "${local.name}_private"))
 }
 
 resource "aws_route" "private_nat_gateway" {
@@ -116,7 +116,7 @@ resource "aws_route" "private_nat_gateway" {
 resource "aws_route_table" "public" {
   count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "public"}), map("Name", "${local.name}_public"))
+  tags   = merge(var.common_tags, local.extra_tags, tomap({"area": "public"}), tomap("Name", "${local.name}_public"))
 }
 
 resource "aws_route" "public_gateway" {
