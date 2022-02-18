@@ -23,12 +23,12 @@ module "vpc" {
   common_tags                  = local.common_tags
 }
 
-# module "consul_client_security_group" {
-#   source              = "./modules/consul-client-security-group"
-#   common_tags         = local.common_tags
-#   create_vpc          = true
-#   vpc_id              = module.vpc.vpc_id
-# }
+module "consul_client_security_group" {
+  source              = "./modules/consul-client-security-group"
+  common_tags         = local.common_tags
+  create_vpc          = true
+  vpc_id              = module.vpc.vpc_id
+}
 
 module "resourcetier_all_vpc_cidrs" { # all vpcs contained in the combined_vpcs_cidr (current resource tier dev or green or blue or main)
   source = "hashicorp/subnets/cidr"

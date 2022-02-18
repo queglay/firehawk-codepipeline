@@ -6,9 +6,9 @@ output "public_subnets" {
   value = module.vpc.public_subnets
 }
 
-# output "consul_client_security_group" {
-#   value = module.consul_client_security_group.consul_client_sg_id
-# }
+output "consul_client_security_group" {
+  value = module.consul_client_security_group.consul_client_sg_id
+}
 
 output "vpc_cidr" {
   value = module.deployervpc_all_subnet_cidrs.base_cidr_block

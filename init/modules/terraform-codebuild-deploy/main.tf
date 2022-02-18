@@ -78,12 +78,6 @@ resource "aws_security_group" "codebuild_deployer" {
   }
 }
 
-resource "aws_security_group" "cloud9_to_vault" {
-  name        = "consul_client_cloud9_vpc_${var.resourcetier}"
-  description = "Security group for Cloud 9 access to Consul and Vault"
-  vpc_id      = data.aws_vpc.primary.id
-}
-
 variable "bucket_extension" {
   type        = string
   description = "The suffix used to generate the bucket name for the codebuild cache."
@@ -349,10 +343,6 @@ resource "aws_codebuild_project" "firehawk_deployer" {
       value = data.aws_vpc.primary.id
     }
 
-    environment_variable {
-      name  = "TF_VAR_consul_cloud9_to_vault_security_group_id"
-      value = aws_security_group.cloud9_to_vault.id
-    }
   }
 
   logs_config {
@@ -381,7 +371,6 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
     security_group_ids = [
       aws_security_group.codebuild_deployer.id,
-      aws_security_group.cloud9_to_vault.id
     ]
   }
 
