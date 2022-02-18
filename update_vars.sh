@@ -210,7 +210,6 @@ function export_vars {
 
   # SSH Public Key is used for debugging instances only.  Not for general use.  Use SSH Certificates instead.
   export TF_VAR_aws_key_name="general_key"
-  export TF_VAR_aws_deployer_key_name="deployer_key"
   export TF_VAR_public_key_path="$HOME/.ssh/id_rsa.pub"
   export TF_VAR_vault_public_key=""
   if [[ ! -f $TF_VAR_public_key_path ]] ; then
