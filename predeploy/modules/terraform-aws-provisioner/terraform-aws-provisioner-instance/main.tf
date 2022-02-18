@@ -33,7 +33,7 @@ resource "aws_instance" "provisioner" {
   count                  = var.create_vpc ? 1 : 0
   ami                    = var.provisioner_ami_id
   instance_type          = var.instance_type
-  # key_name               = var.aws_key_name # The PEM key is disabled for use in production, can be used for debugging.  Instead, signed SSH certificates should be used to access the host.
+  key_name               = var.aws_deployer_key_name # The PEM key is disabled for use in production, can be used for debugging.  Instead, signed SSH certificates should be used to access the host.
   subnet_id              = tolist(var.public_subnet_ids)[0]
   tags                   = merge(map("Name", var.name), local.provisioner_tags)
   # user_data              = data.template_file.user_data_auth_client.rendered
