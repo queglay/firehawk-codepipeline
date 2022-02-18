@@ -47,11 +47,11 @@ variable "public_subnet_ids" {
   type        = list(string)
   default     = []
 }
-variable "aws_key_name" {
-  description = "The name of the AWS PEM key for access to the instance"
-  type        = string
-  default     = null
-}
+# variable "aws_key_name" {
+#   description = "The name of the AWS PEM key for access to the instance"
+#   type        = string
+#   default     = null
+# }
 variable "instance_type" {
   description = "The AWS instance type to use."
   type        = string
