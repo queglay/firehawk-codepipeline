@@ -32,7 +32,7 @@ module "iam_policies_s3_read_write" {
 # }
 # # Adds policies necessary for running Consul
 # module "consul_iam_policies_for_client" {
-#   source = "github.com/hashicorp/terraform-aws-consul.git//modules/consul-iam-policies?ref=v0.7.7"
+#   source = "github.com/hashicorp/terraform-aws-consul.git//modules/consul-iam-policies?ref=v0.8.0"
 
 #   iam_role_id = aws_iam_role.instance_role.id
 # }
