@@ -344,7 +344,6 @@ resource "aws_codebuild_project" "firehawk_deployer" {
     }
 
   }
-
   logs_config {
     cloudwatch_logs {
       group_name = local.log_group
