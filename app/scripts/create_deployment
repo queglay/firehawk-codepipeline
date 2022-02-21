@@ -59,7 +59,7 @@ function warn_if_invalid {
     printf "$var_name"
     printf "\n  Found role $ami_role result:"
     printf "\n  $ami_result\n\n"
-    echo "$var_name=$ami_result" >> $SCRIPTDIR/../modules/firehawk/env_vars.sh
+    echo "$var_name=$ami_result" | tee --append $SCRIPTDIR/../modules/firehawk/env_vars.sh
   fi
 }
 
