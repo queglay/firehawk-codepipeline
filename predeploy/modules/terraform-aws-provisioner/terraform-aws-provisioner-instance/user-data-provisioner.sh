@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# log userdata
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
 echo "Configure max revisions for codedeploy-agent..."
 
 sed '$ d' /etc/codedeploy-agent/conf/codedeployagent.yml > /etc/codedeploy-agent/conf/temp.yml
