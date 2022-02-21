@@ -45,7 +45,7 @@ resource "aws_instance" "provisioner" {
 }
 data "template_file" "user_data_provisioner" {
   template = file("${path.module}/user-data-provisioner.sh")
-  vars = {
-    max_revisions = 2 # the number of code revisions to store on the instance
-  }
+  # vars = {
+  #   max_revisions = 2 # the number of code revisions to store on the instance
+  # }
 }
