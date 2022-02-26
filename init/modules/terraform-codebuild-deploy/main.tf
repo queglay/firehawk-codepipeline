@@ -339,7 +339,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
     }
 
     environment_variable {
-      name  = "TF_VAR_vpc_id_main_cloud9"
+      name  = "TF_VAR_vpc_id_main_provisioner"
       value = data.aws_vpc.primary.id
     }
 

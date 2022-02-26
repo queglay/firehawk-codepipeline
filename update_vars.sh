@@ -143,7 +143,7 @@ function export_vars {
     export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
     export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
     macid=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
-    export TF_VAR_vpc_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
+    export TF_VAR_vpc_id_main_provisioner=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
     export TF_VAR_cloud9_instance_name="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "Name")|.Value' --raw-output)"
     export TF_VAR_account_id=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep -oP '(?<="accountId" : ")[^"]*(?=")')
   else
