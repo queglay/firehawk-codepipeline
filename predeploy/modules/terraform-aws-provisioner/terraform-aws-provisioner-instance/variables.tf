@@ -85,3 +85,8 @@ variable "vpcname_vaultvpc" {
     description = "A namespace component defining the location of the terraform remote state"
     type = string
 }
+variable "sleep" {
+  description = "Sleep will disable the nat gateway and shutdown instances to save cost during idle time."
+  type        = bool
+  default     = false
+}

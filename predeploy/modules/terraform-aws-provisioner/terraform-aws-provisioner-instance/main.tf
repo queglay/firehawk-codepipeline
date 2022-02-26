@@ -49,3 +49,28 @@ data "template_file" "user_data_provisioner" {
   #   max_revisions = 2 # the number of code revisions to store on the instance
   # }
 }
+
+locals {
+  id = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].id : null
+}
+
+resource "null_resource" "start_instance" {
+  depends_on = [aws_instance.provisioner]
+  count      = (!var.sleep && var.create_vpc) ? 1 : 0
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = "aws ec2 start-instances --instance-ids ${local.id}"
+  }
+}
+
+resource "null_resource" "shutdown_instance" {
+  count = var.sleep && var.create_vpc ? 1 : 0
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOT
+      aws ec2 stop-instances --instance-ids ${local.id}
+EOT
+  }
+}
