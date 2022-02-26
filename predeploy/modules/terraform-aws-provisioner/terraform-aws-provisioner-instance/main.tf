@@ -23,10 +23,10 @@ locals {
     route            = "public"
     deployment_group = "firehawk-provisioner-deploy-group"
   })
-  public_ip           = element(concat(aws_instance.provisioner.*.public_ip, list("")), 0)
-  private_ip          = element(concat(aws_instance.provisioner.*.private_ip, list("")), 0)
-  public_dns          = element(concat(aws_instance.provisioner.*.public_dns, list("")), 0)
-  id                  = element(concat(aws_instance.provisioner.*.id, list("")), 0)
+  public_ip           = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].public_ip : null
+  private_ip          = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].private_ip : null
+  public_dns          = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].public_dns : null
+  id                  = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].id : null
   provisioner_address = var.route_public_domain_name ? "provisioner.${var.public_domain_name}" : local.public_ip
 }
 resource "aws_instance" "provisioner" {
@@ -49,11 +49,6 @@ data "template_file" "user_data_provisioner" {
   #   max_revisions = 2 # the number of code revisions to store on the instance
   # }
 }
-
-locals {
-  id = length(aws_instance.provisioner) > 0 ? aws_instance.provisioner[0].id : null
-}
-
 resource "null_resource" "start_instance" {
   depends_on = [aws_instance.provisioner]
   count      = (!var.sleep && var.create_vpc) ? 1 : 0
