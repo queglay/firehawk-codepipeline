@@ -144,4 +144,5 @@ aws deploy create-deployment \
   --description "Firehawk deployment" \
   --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip \
   --file-exists-behavior OVERWRITE
+  --ignore-application-stop-failures
 cd $EXECDIR
