@@ -286,7 +286,14 @@ function export_vars {
   if [[ -f "$TF_VAR_ca_public_key_file_path" ]]; then
     export TF_VAR_SSL_expiry=$(cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -noout -enddate | awk -F "=" '{print $2}')
     export PKR_VAR_SSL_expiry="$TF_VAR_SSL_expiry"
-    echo "Current SSL Certificates will expire at: $TF_VAR_SSL_expiry"
+    
+    if cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -checkend 86400 -noout
+    then
+      echo "Current SSL Certificates will expire at: $TF_VAR_SSL_expiry"
+    else
+      echo "Certificate has expired or will do so within 24 hours!"
+      echo "(or is invalid/not found)"
+    fi
   else
     echo "Warning: No SSL Certifcates exist."
   fi

@@ -15,11 +15,7 @@ cd $SCRIPTDIR
 
 SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 
-$SUDOCMD yum install -y python
-$SUDOCMD yum install -y python3.7
-$SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
-
-$SUDOCMD yum install -y jq
+$SUDOCMD yum install -y jq openssl python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 mkdir -p $SCRIPTDIR/tmp
 
 if terraform --version | grep -nq "Terraform v$terraform_version"; then
