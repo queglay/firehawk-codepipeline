@@ -142,6 +142,6 @@ aws deploy create-deployment \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --deployment-group-name firehawk-deployment-group \
   --description "Firehawk deployment" \
-  --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip
+  --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip \
   --file-exists-behavior OVERWRITE
 cd $EXECDIR
