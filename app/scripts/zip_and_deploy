@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+cd $SCRIPTDIR/../modules
+rm -fr codedeploy-app-firehawk.zip
+zip -qr codedeploy-app-firehawk.zip firehawk/??*
+
+aws s3 cp codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
+
+aws deploy create-deployment \
+  --application-name firehawk-codedeploy-app \
+  --deployment-config-name CodeDeployDefault.OneAtATime \
+  --deployment-group-name firehawk-deployment-group \
+  --description "Firehawk deployment" \
+  --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip \
+  --file-exists-behavior OVERWRITE \
+  --ignore-application-stop-failures
