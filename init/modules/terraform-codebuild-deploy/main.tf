@@ -36,23 +36,30 @@ data "aws_internet_gateway" "gw" {
   tags = var.common_tags
 }
 
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.primary.id
-  tags   = tomap({ "area" : "public" })
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.primary.id]
+  }
+  tags = {
+    area = "public"
+  }
 }
-
 data "aws_subnet" "public" {
-  for_each = data.aws_subnet_ids.public.ids
+  for_each = toset(data.aws_subnets.public.ids)
   id       = each.value
 }
-
-data "aws_subnet_ids" "private" {
-  vpc_id = data.aws_vpc.primary.id
-  tags   = tomap({ "area" : "private" })
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.primary.id]
+  }
+  tags = {
+    area = "private"
+  }
 }
-
 data "aws_subnet" "private" {
-  for_each = data.aws_subnet_ids.private.ids
+  for_each = toset(data.aws_subnets.private.ids)
   id       = each.value
 }
 
@@ -366,7 +373,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
   vpc_config {
     vpc_id = data.aws_vpc.primary.id
 
-    subnets = data.aws_subnet_ids.private.ids
+    subnets = toset(data.aws_subnets.private.ids)
 
     security_group_ids = [
       aws_security_group.codebuild_deployer.id,

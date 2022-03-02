@@ -11,8 +11,12 @@ data "aws_vpc" "primary" {
   default = false
   tags    = local.common_tags
 }
-
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "public")
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.primary.id]
+  }
+  tags = {
+    area = "public"
+  }
 }

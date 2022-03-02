@@ -5,5 +5,5 @@ output "vpc_cidr" {
   value = data.aws_vpc.primary.cidr_block
 }
 output "public_subnet_ids" {
-  value = data.aws_subnet_ids.public.ids
+  value = toset(data.aws_subnets.public.ids)
 }
