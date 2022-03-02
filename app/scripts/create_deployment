@@ -88,6 +88,7 @@ function retrieve_ami {
 
 rm -fr $SCRIPTDIR/../modules/firehawk/env_vars.sh
 echo "#!/bin/bash" | tee $SCRIPTDIR/../modules/firehawk/env_vars.sh
+echo "export FH_VAR_infra_state=\"destroy\"" 2>&1 | tee --append $SCRIPTDIR/../modules/firehawk/env_vars.sh
 export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_ami_path; git rev-parse HEAD)"
 echo "export TF_VAR_ami_commit_hash=$TF_VAR_ami_commit_hash" 2>&1 | tee --append $SCRIPTDIR/../modules/firehawk/env_vars.sh
 
