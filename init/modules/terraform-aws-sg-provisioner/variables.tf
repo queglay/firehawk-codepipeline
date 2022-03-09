@@ -16,18 +16,3 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
-
-# variable "remote_cloud_public_ip_cidr" {
-#   description = "The remote cloud IP public address that will access the provisioner (cloud 9)"
-#   type = string
-# }
-
-# variable "remote_cloud_private_ip_cidr" {
-#   description = "The remote cloud private IP address that will access the provisioner (cloud 9)"
-#   type = string
-# }
-
-variable "onsite_public_ip" {
-  description = "The public ip address of your onsite location to enable access to security groups and openVPN."
-  type = string
-}
