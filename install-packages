@@ -18,7 +18,7 @@ SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 $SUDOCMD yum install -y jq openssl python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 mkdir -p $SCRIPTDIR/tmp
 
-if terraform --version | grep -nq "Terraform v$terraform_version"; then
+if terraform --version 2> /dev/null | grep -nq "Terraform v$terraform_version"; then
     echo 'terraform already installed'
 else
     wget https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip -P /tmp/ --quiet # Get terraform
@@ -26,7 +26,7 @@ else
     $SUDOCMD mv /tmp/terraform /usr/local/bin/.
 fi
 
-if terragrunt --version | grep -nq "terragrunt version v$terragrunt_version"; then
+if terragrunt --version 2> /dev/null | grep -nq "terragrunt version v$terragrunt_version"; then
     echo 'Terragrunt already installed'
 else
     wget https://github.com/gruntwork-io/terragrunt/releases/download/v$terragrunt_version/terragrunt_linux_386 -P /tmp/ --quiet # Get Terragrunt
