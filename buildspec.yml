@@ -25,11 +25,7 @@ phases:
 
 artifacts:
   files:
-    - app/modules/codedeploy-app-firehawk.zip
-  # files:
-  #   - '**/*'
-  #   # - app/modules/codedeploy-app-firehawk.zip
-  #   # - app/modules/firehawk
-  # base-directory: app/modules/firehawk
-  # name: BuildArtifact
-  # discard-paths: no
+    - '**/*'
+  base-directory: app/modules/firehawk
+  name: BuildArtifact
+  discard-paths: no
