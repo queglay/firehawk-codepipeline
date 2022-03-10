@@ -30,5 +30,7 @@ phases:
       # - ./modules/firehawk-ami/build.sh
 
 artifacts:
-  files:
-    - app/modules/codedeploy-app-firehawk.zip
+  # files:
+    # - app/modules/codedeploy-app-firehawk.zip
+    # - app/modules/firehawk
+  base-directory: app/modules/firehawk
