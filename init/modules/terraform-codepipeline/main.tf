@@ -1,4 +1,5 @@
 resource "aws_codepipeline" "codepipeline" {
+  depends_on = [ aws_iam_role_policy.codepipeline_policy ]
   name     = "tf-firehawk-deploy-pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
 
