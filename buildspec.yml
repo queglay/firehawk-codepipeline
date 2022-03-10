@@ -19,21 +19,17 @@ phases:
       - mkdir -p "$HOME/.ssh/tls"
       - export PATH=$PATH:/root/.local/bin
       - echo "PATH=$PATH"
-      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      # - ./init/init
   build:
     commands:
-      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - app/scripts/create_deployment_zip
-      # - ./modules/firehawk-base-ami/build.sh
-      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      # - ./modules/firehawk-ami/build.sh
 
 artifacts:
   files:
-    - '**/*'
-    # - app/modules/codedeploy-app-firehawk.zip
-    # - app/modules/firehawk
-  base-directory: app/modules/firehawk
-  name: BuildArtifact
-  discard-paths: no
+    - app/modules/codedeploy-app-firehawk.zip
+  # files:
+  #   - '**/*'
+  #   # - app/modules/codedeploy-app-firehawk.zip
+  #   # - app/modules/firehawk
+  # base-directory: app/modules/firehawk
+  # name: BuildArtifact
+  # discard-paths: no
