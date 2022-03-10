@@ -70,11 +70,11 @@ locals {
   log_group = "firehawk-codebuild-ami"
 }
 
-resource "aws_security_group" "codebuild_deployer" {
-  name        = "codebuild-deployer"
+resource "aws_security_group" "codebuild_ami" {
+  name        = "codebuild-ami"
   vpc_id      = data.aws_vpc.primary.id
   description = "CodeBuild Deployer Security Group"
-  tags        = merge(tomap({ "Name" : "codebuild-deployer" }), var.common_tags, local.extra_tags)
+  tags        = merge(tomap({ "Name" : "codebuild-ami" }), var.common_tags, local.extra_tags)
 
   egress {
     protocol    = "-1"
@@ -99,7 +99,7 @@ resource "aws_s3_bucket_acl" "acl_config" {
   acl    = "private"
 }
 
-resource "aws_iam_role" "firehawk_codebuild_deployer_role" {
+resource "aws_iam_role" "firehawk_codebuild_ami_role" {
   name = "CodeBuildDeployerRoleFirehawk"
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/IAMFullAccess",
@@ -126,7 +126,7 @@ EOF
 
 resource "aws_iam_role_policy" "codebuild_service_role_policy" {
   name   = "CodeBuildServicePolicyFirehawk"
-  role   = aws_iam_role.firehawk_codebuild_deployer_role.name
+  role   = aws_iam_role.firehawk_codebuild_ami_role.name
   policy = <<POLICY
 {
     "Version": "2012-10-17",
@@ -242,8 +242,8 @@ POLICY
 }
 
 
-# resource "aws_iam_role_policy" "firehawk_codebuild_deployer_policy" {
-#   role = aws_iam_role.firehawk_codebuild_deployer_role.name
+# resource "aws_iam_role_policy" "firehawk_codebuild_ami_policy" {
+#   role = aws_iam_role.firehawk_codebuild_ami_role.name
 
 #   policy = <<POLICY
 # {
@@ -323,7 +323,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
   name                   = "firehawk-deployer"
   description            = "firehawk_deployer_project"
   build_timeout          = "90"
-  service_role           = aws_iam_role.firehawk_codebuild_deployer_role.arn
+  service_role           = aws_iam_role.firehawk_codebuild_ami_role.arn
   concurrent_build_limit = 1
   artifacts {
     type = "NO_ARTIFACTS"
@@ -342,7 +342,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
 
     environment_variable {
       name  = "TF_VAR_deployer_sg_id"
-      value = aws_security_group.codebuild_deployer.id
+      value = aws_security_group.codebuild_ami.id
     }
 
     environment_variable {
@@ -376,7 +376,7 @@ resource "aws_codebuild_project" "firehawk_deployer" {
     subnets = toset(data.aws_subnets.private.ids)
 
     security_group_ids = [
-      aws_security_group.codebuild_deployer.id,
+      aws_security_group.codebuild_ami.id,
     ]
   }
 
