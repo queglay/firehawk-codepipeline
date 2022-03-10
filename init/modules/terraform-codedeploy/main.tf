@@ -33,20 +33,11 @@ resource "aws_sns_topic" "firehawk_sns_topic" {
   name = "firehawk-codedeploy-sns"
 }
 
-resource "aws_codedeploy_deployment_config" "firehawk_deployment_config" {
-  deployment_config_name = "firehawk-deployment-config"
-
-  minimum_healthy_hosts {
-    type  = "HOST_COUNT"
-    value = 1
-  }
-}
-
 resource "aws_codedeploy_deployment_group" "firehawk_deployment_group" {
   app_name              = aws_codedeploy_app.firehawk_app.name
   deployment_group_name = "firehawk-deployment-group"
   service_role_arn      = aws_iam_role.firehawk_role.arn
-  deployment_config_name = aws_codedeploy_deployment_config.firehawk_deployment_config.id
+  deployment_config_name = "CodeDeployDefault.OneAtATime"
 
   ec2_tag_set {
     ec2_tag_filter {
