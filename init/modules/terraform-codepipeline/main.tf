@@ -1,5 +1,5 @@
 resource "aws_codepipeline" "codepipeline" {
-  name     = "tf-test-pipeline"
+  name     = "tf-firehawk-deploy-pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
@@ -24,9 +24,11 @@ resource "aws_codepipeline" "codepipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.my_github_connection.arn
-        FullRepositoryId = "queglay/firehawk-codepipeline"
-        BranchName       = "main"
+        ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
+        FullRepositoryId     = "queglay/firehawk-codepipeline"
+        BranchName           = "main"
+        OutputArtifactFormat = "CODEBUILD_CLONE_REF"
+        # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
       }
     }
   }
@@ -61,20 +63,20 @@ resource "aws_codepipeline" "codepipeline" {
       version         = "1"
 
       configuration = {
-        ApplicationName = "firehawk-codedeploy-app"
+        ApplicationName     = "firehawk-codedeploy-app"
         DeploymentGroupName = "firehawk-deployment-group"
         # TaskDefinitionTemplateArtifact = "BuildArtifact"
         # TaskDefinitionTemplatePath = "taskdef.json"
         # AppSpecTemplateArtifact = "BuildArtifact"
         # AppSpecTemplatePath = "appspec.yml"
       }
-    #   configuration = {
-    #     ActionMode     = "REPLACE_ON_FAILURE"
-    #     Capabilities   = "CAPABILITY_AUTO_EXPAND,CAPABILITY_IAM"
-    #     OutputFileName = "CreateStackOutput.json"
-    #     StackName      = "MyStack"
-    #     TemplatePath   = "build_output::sam-templated.yaml"
-    #   }
+      #   configuration = {
+      #     ActionMode     = "REPLACE_ON_FAILURE"
+      #     Capabilities   = "CAPABILITY_AUTO_EXPAND,CAPABILITY_IAM"
+      #     OutputFileName = "CreateStackOutput.json"
+      #     StackName      = "MyStack"
+      #     TemplatePath   = "build_output::sam-templated.yaml"
+      #   }
     }
   }
 }
