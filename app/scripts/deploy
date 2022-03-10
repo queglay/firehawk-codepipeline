@@ -3,10 +3,6 @@
 set -e
 
 cd $SCRIPTDIR/../modules
-rm -fr codedeploy-app-firehawk.zip
-zip -qr codedeploy-app-firehawk.zip firehawk/??*
-
-aws s3 cp codedeploy-app-firehawk.zip s3://codedeploy.dev.firehawkvfx.com
 
 aws deploy create-deployment \
   --application-name firehawk-codedeploy-app \

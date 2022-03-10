@@ -21,6 +21,6 @@ echo "export FH_VAR_target_infra_state=\"create\"" 2>&1 | tee --append $SCRIPTDI
 # Finish config and deploy
 . $SCRIPTDIR/add_images_to_env # Append images to the env
 . $SCRIPTDIR/zip # Zip and deploy app
-. $SCRIPTDIR/deploy
+# . $SCRIPTDIR/deploy
 
 cd $EXECDIR
