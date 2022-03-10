@@ -20,6 +20,7 @@ echo "export FH_VAR_target_infra_state=\"destroy\"" 2>&1 | tee --append $SCRIPTD
 
 # Finish config and deploy
 . $SCRIPTDIR/add_images_to_env # Append images to the env
-. $SCRIPTDIR/zip_and_deploy # Zip and deploy app
+. $SCRIPTDIR/zip # Zip and deploy app
+. $SCRIPTDIR/deploy
 
 cd $EXECDIR
