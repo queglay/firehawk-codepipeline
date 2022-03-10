@@ -35,8 +35,3 @@ variable "firehawk_path" {
   description = "The full path to firehawk-main"
   type        = string
 }
-
-variable "bucket_extension" {
-  type        = string
-  description = "The suffix used to generate the bucket name for the codebuild cache."
-}

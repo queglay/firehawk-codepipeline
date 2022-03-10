@@ -12,22 +12,6 @@ data "aws_caller_identity" "current" {}
 
 # # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
 
-# resource "aws_s3_bucket" "log_bucket" {
-#   bucket = local.bucket_name
-#   acl    = "log-delivery-write"
-#   versioning {
-#     enabled = true
-#   }
-#   # Enable server-side encryption by default
-#   server_side_encryption_configuration {
-#     rule {
-#       apply_server_side_encryption_by_default {
-#         sse_algorithm = "AES256"
-#       }
-#     }
-#   }
-# }
-
 data "aws_vpc" "primary" {
   default = false
   tags    = var.common_tags
@@ -45,10 +29,12 @@ data "aws_subnets" "public" {
     area = "public"
   }
 }
+
 data "aws_subnet" "public" {
   for_each = toset(data.aws_subnets.public.ids)
   id       = each.value
 }
+
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
@@ -67,14 +53,14 @@ locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
-  log_group = "firehawk-codebuild-ami"
+  log_group = "firehawk-codebuild-createapp"
 }
 
-resource "aws_security_group" "codebuild_ami" {
-  name        = "codebuild-ami"
+resource "aws_security_group" "codebuild_createapp" {
+  name        = "codebuild-createapp"
   vpc_id      = data.aws_vpc.primary.id
   description = "CodeBuild Deployer Security Group"
-  tags        = merge(tomap({ "Name" : "codebuild-ami" }), var.common_tags, local.extra_tags)
+  tags        = merge(tomap({ "Name" : "codebuild-createapp" }), var.common_tags, local.extra_tags)
 
   egress {
     protocol    = "-1"
@@ -85,8 +71,13 @@ resource "aws_security_group" "codebuild_ami" {
   }
 }
 
+variable "bucket_extension" {
+  type        = string
+  description = "The suffix used to generate the bucket name for the codebuild cache."
+}
+
 resource "aws_s3_bucket" "codebuild_cache" {
-  bucket = "amibuild-cache.${var.bucket_extension}"
+  bucket = "createapp-cache.${var.bucket_extension}"
 }
 
 resource "aws_s3_bucket_acl" "acl_config" {
@@ -94,8 +85,8 @@ resource "aws_s3_bucket_acl" "acl_config" {
   acl    = "private"
 }
 
-resource "aws_iam_role" "firehawk_codebuild_ami_role" {
-  name = "CodeBuildAmiBuildRoleFirehawk"
+resource "aws_iam_role" "firehawk_codebuild_createapp_role" {
+  name = "CodeBuildCreateAppRoleFirehawk"
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/IAMFullAccess",
     "arn:aws:iam::aws:policy/AdministratorAccess",
@@ -120,8 +111,8 @@ EOF
 }
 
 resource "aws_iam_role_policy" "codebuild_service_role_policy" {
-  name   = "CodeBuildServicePolicyFirehawkBuildAmi"
-  role   = aws_iam_role.firehawk_codebuild_ami_role.name
+  name   = "CodeBuildServicePolicyFirehawkCreateApp"
+  role   = aws_iam_role.firehawk_codebuild_createapp_role.name
   policy = <<POLICY
 {
     "Version": "2012-10-17",
@@ -236,92 +227,14 @@ resource "aws_iam_role_policy" "codebuild_service_role_policy" {
 POLICY
 }
 
-
-# resource "aws_iam_role_policy" "firehawk_codebuild_ami_policy" {
-#   role = aws_iam_role.firehawk_codebuild_ami_role.name
-
-#   policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Resource": [
-#         "*"
-#       ],
-#       "Action": [
-#         "logs:CreateLogGroup",
-#         "logs:CreateLogStream",
-#         "logs:PutLogEvents"
-#       ]
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "ec2:CreateNetworkInterface",
-#         "ec2:DescribeDhcpOptions",
-#         "ec2:DescribeNetworkInterfaces",
-#         "ec2:DeleteNetworkInterface",
-#         "ec2:DescribeSubnets",
-#         "ec2:DescribeSecurityGroups",
-#         "ec2:DescribeVpcs"
-#       ],
-#       "Resource": "*"
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "ec2:CreateNetworkInterfacePermission"
-#       ],
-#       "Resource": [
-#         "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*"
-#       ],
-#       "Condition": {
-#         "StringEquals": {
-#           "ec2:Subnet": ${local.public_subnet_arns},
-#           "ec2:AuthorizedService": "codebuild.amazonaws.com"
-#         }
-#       }
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Action": [
-#         "s3:*"
-#       ],
-#       "Resource": [
-#         "${aws_s3_bucket.codebuild_cache.arn}",
-#         "${aws_s3_bucket.codebuild_cache.arn}/*"
-#       ]
-#     }
-#   ]
-# }
-# POLICY
-# }
-
-resource "aws_codebuild_webhook" "git_push" {
-  project_name = aws_codebuild_project.firehawk_amibuild.name
-  build_type   = "BUILD"
-  filter_group {
-    filter {
-      type    = "EVENT"
-      pattern = "PUSH"
-    }
-
-    filter {
-      type    = "HEAD_REF"
-      pattern = "main"
-    }
-  }
-}
-
-resource "aws_codebuild_project" "firehawk_amibuild" {
-  name                   = "firehawk-amibuild"
-  description            = "firehawk_amibuild_project"
+resource "aws_codebuild_project" "firehawk_createapp" {
+  name                   = "firehawk-createapp"
+  description            = "firehawk_createapp_project"
   build_timeout          = "90"
-  service_role           = aws_iam_role.firehawk_codebuild_ami_role.arn
+  service_role           = aws_iam_role.firehawk_codebuild_createapp_role.arn
   concurrent_build_limit = 1
   artifacts {
-    type = "NO_ARTIFACTS"
+    type = "NO_ARTIFACTS" # may need BuildArtifact
   }
 
   cache {
@@ -337,7 +250,7 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
 
     environment_variable {
       name  = "TF_VAR_deployer_sg_id"
-      value = aws_security_group.codebuild_ami.id
+      value = aws_security_group.codebuild_createapp.id
     }
 
     environment_variable {
@@ -349,13 +262,12 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
   logs_config {
     cloudwatch_logs {
       group_name = local.log_group
-      # stream_name = "log-stream"
     }
   }
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/firehawkvfx/packer-firehawk-amis.git"
+    location        = "https://github.com/queglay/firehawk-codepipeline.git"
     git_clone_depth = 1
 
     git_submodules_config {
@@ -371,56 +283,8 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
     subnets = toset(data.aws_subnets.private.ids)
 
     security_group_ids = [
-      aws_security_group.codebuild_ami.id,
+      aws_security_group.codebuild_createapp.id,
     ]
   }
 
-  # tags = {
-  #   Environment = "Test"
-  # }
 }
-
-
-# variable "vpc_id" {}
-# variable "public_subnets" {}
-# variable "private_subnets" {}
-
-# resource "aws_codebuild_project" "project-with-cache" {
-#   name           = "test-project-cache"
-#   description    = "test_codebuild_project_cache"
-#   build_timeout  = "5"
-#   queued_timeout = "5"
-
-#   service_role = aws_iam_role.example.arn
-
-#   artifacts {
-#     type = "NO_ARTIFACTS"
-#   }
-
-#   cache {
-#     type  = "LOCAL"
-#     modes = ["LOCAL_DOCKER_LAYER_CACHE", "LOCAL_SOURCE_CACHE"]
-#   }
-
-#   environment {
-#     compute_type                = "BUILD_GENERAL1_SMALL"
-#     image                       = "aws/codebuild/standard:1.0"
-#     type                        = "LINUX_CONTAINER"
-#     image_pull_credentials_type = "CODEBUILD"
-
-#     environment_variable {
-#       name  = "SOME_KEY1"
-#       value = "SOME_VALUE1"
-#     }
-#   }
-
-#   source {
-#     type            = "GITHUB"
-#     location        = "https://github.com/mitchellh/packer.git"
-#     git_clone_depth = 1
-#   }
-
-#   tags = {
-#     Environment = "Test"
-#   }
-# }
