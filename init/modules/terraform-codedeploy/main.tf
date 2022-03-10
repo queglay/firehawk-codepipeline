@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "AWSCodeDeployRole" {
 
 resource "aws_codedeploy_app" "firehawk_app" {
   name = "firehawk-codedeploy-app"
-  tags = { "deployment_group" : "firehawk-test-deploy-group"}
+  tags = { "deployment_group" : "firehawk-provisioner-deploy-group"}
 }
 
 resource "aws_sns_topic" "firehawk_sns_topic" {

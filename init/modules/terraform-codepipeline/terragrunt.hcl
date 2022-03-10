@@ -11,6 +11,8 @@ inputs = local.common_vars.inputs
 dependencies {
   paths = [
     "../vpc",
+    "../terraform-codedeploy",
+    "../terraform-codebuild-createapp"
     # "../terraform-aws-provisioner/terraform-aws-provisioner-instance"
     ]
 }
