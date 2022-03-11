@@ -274,6 +274,71 @@ resource "aws_codebuild_project" "firehawk_createapp" {
   source {
     type            = "GITHUB"
     location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
+    buildspec       = "buildspec/buildspec-createapp.yaml"
+    git_clone_depth = 1
+
+    git_submodules_config {
+      fetch_submodules = false
+    }
+  }
+
+  source_version = "main"
+
+  vpc_config {
+    vpc_id = data.aws_vpc.primary.id
+
+    subnets = toset(data.aws_subnets.private.ids)
+
+    security_group_ids = [
+      aws_security_group.codebuild_createapp.id,
+    ]
+  }
+
+}
+
+resource "aws_codebuild_project" "firehawk_destroyapp" {
+  name                   = "firehawk-destroyapp"
+  description            = "firehawk_destroyapp_project"
+  build_timeout          = "90"
+  service_role           = aws_iam_role.firehawk_codebuild_createapp_role.arn
+  concurrent_build_limit = 1
+  artifacts {
+    type = "NO_ARTIFACTS" # may need BuildArtifact
+  }
+
+  cache {
+    type     = "S3"
+    location = aws_s3_bucket.codebuild_cache.bucket
+  }
+
+  environment {
+    compute_type = "BUILD_GENERAL1_SMALL"
+    # image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+
+    environment_variable {
+      name  = "TF_VAR_deployer_sg_id"
+      value = aws_security_group.codebuild_createapp.id
+    }
+
+    environment_variable {
+      name  = "TF_VAR_vpc_id_main_provisioner"
+      value = data.aws_vpc.primary.id
+    }
+
+  }
+  logs_config {
+    cloudwatch_logs {
+      group_name = local.log_group
+    }
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
+    buildspec       = "buildspec/buildspec-destroyapp.yaml"
     git_clone_depth = 1
 
     git_submodules_config {
