@@ -23,6 +23,8 @@ echo "pwd: $PWD"
 git pull origin
 ./gitpullrecursive --init-all
 
+app/modules/firehawk/scripts/diskspace_check
+
 sudo mkdir -p $targetdir
 sudo chown $USER:$USER $targetdir
 sudo chmod +rwX $targetdir
