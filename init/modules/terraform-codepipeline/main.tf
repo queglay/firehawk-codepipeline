@@ -72,7 +72,7 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Destroy Requires Approval"
+    name = "ApproveDestroy"
     action {
       name     = "Approval"
       category = "Approval"
