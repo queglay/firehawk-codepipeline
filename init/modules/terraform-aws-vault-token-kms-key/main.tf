@@ -13,13 +13,13 @@ locals {
 }
 
 resource "aws_kms_key" "vault" {
-  description = "Vault token secret key"
+  description             = "Vault token secret key"
   deletion_window_in_days = 10
   tags                    = local.aws_kms_key_tags
 }
 
 resource "aws_kms_alias" "alias" {
-  alias         = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_token_key_alias"
+  name          = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_token_key_alias"
   target_key_id = aws_kms_key.vault.key_id
 }
 
