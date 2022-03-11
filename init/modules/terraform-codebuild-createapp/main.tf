@@ -53,7 +53,7 @@ locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
-  log_group = "firehawk-codebuild-createapp"
+  log_group          = "firehawk-codebuild-createapp"
 }
 
 resource "aws_security_group" "codebuild_createapp" {
@@ -248,8 +248,9 @@ resource "aws_codebuild_project" "firehawk_createapp" {
   }
 
   environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    compute_type = "BUILD_GENERAL1_SMALL"
+    # image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
