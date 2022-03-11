@@ -227,6 +227,11 @@ resource "aws_iam_role_policy" "codebuild_service_role_policy" {
 POLICY
 }
 
+data "aws_ssm_parameter" "git_repo_id" {
+  name = "/firehawk/resourcetier/${var.resourcetier}/git_repo_id"
+}
+
+
 resource "aws_codebuild_project" "firehawk_createapp" {
   name                   = "firehawk-createapp"
   description            = "firehawk_createapp_project"
@@ -267,7 +272,7 @@ resource "aws_codebuild_project" "firehawk_createapp" {
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/firehawkvfx/firehawk.git"
+    location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
     git_clone_depth = 1
 
     git_submodules_config {
