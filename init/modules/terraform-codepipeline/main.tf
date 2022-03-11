@@ -30,7 +30,7 @@ resource "aws_codepipeline" "codepipeline" {
 
       configuration = {
         ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
-        FullRepositoryId     = "${data.aws_ssm_parameter.git_repo_id.value}"
+        FullRepositoryId     = data.aws_ssm_parameter.git_repo_id.value
         BranchName           = "main"
         OutputArtifactFormat = "CODEBUILD_CLONE_REF"
         # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
