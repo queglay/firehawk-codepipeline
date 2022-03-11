@@ -9,3 +9,9 @@ locals {
 # skip = true # profiles are only created during init since the output names are required to configure vault iam access
 
 inputs = local.common_vars.inputs
+
+dependencies {
+  paths = [
+    "../terraform-aws-vault-token-kms-key"
+    ]
+}
