@@ -32,8 +32,9 @@ if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
   rm -fr "$targetdir/$dirname"
 fi
 cp -fr $SCRIPTDIR $targetdir/.
+
 cd $targetdir/$dirname
 
-./install-packages
-source ./update_vars.sh --resourcetier $resourcetier
-./init/init-aws-shell
+$targetdir/$dirname/install-packages
+source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
+$targetdir/$dirname/init/init-aws-shell
