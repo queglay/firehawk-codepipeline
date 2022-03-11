@@ -267,7 +267,7 @@ resource "aws_codebuild_project" "firehawk_createapp" {
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/queglay/firehawk-codepipeline.git"
+    location        = "https://github.com/firehawkvfx/firehawk.git"
     git_clone_depth = 1
 
     git_submodules_config {
