@@ -19,7 +19,7 @@ resource "aws_kms_key" "vault" {
 }
 
 resource "aws_kms_alias" "alias" {
-  name          = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_token_key_alias"
+  name          = "alias/firehawk/resourcetier/${var.resourcetier}/vault_kms_token_key_alias"
   target_key_id = aws_kms_key.vault.key_id
 }
 
