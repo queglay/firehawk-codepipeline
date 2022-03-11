@@ -274,7 +274,7 @@ resource "aws_codebuild_project" "firehawk_createapp" {
   source {
     type            = "GITHUB"
     location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
-    buildspec       = "buildspec/buildspec-createapp.yaml"
+    buildspec       = "buildspec/buildspec-createapp.yml"
     git_clone_depth = 1
 
     git_submodules_config {
@@ -338,7 +338,7 @@ resource "aws_codebuild_project" "firehawk_destroyapp" {
   source {
     type            = "GITHUB"
     location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
-    buildspec       = "buildspec/buildspec-destroyapp.yaml"
+    buildspec       = "buildspec/buildspec-destroyapp.yml"
     git_clone_depth = 1
 
     git_submodules_config {
