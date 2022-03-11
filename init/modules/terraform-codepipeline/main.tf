@@ -3,9 +3,9 @@ data "aws_ssm_parameter" "git_repo_id" {
 }
 
 resource "aws_codepipeline" "codepipeline" {
-  depends_on = [ aws_iam_role_policy.codepipeline_policy ]
-  name     = "tf-firehawk-deploy-pipeline"
-  role_arn = aws_iam_role.codepipeline_role.arn
+  depends_on = [aws_iam_role_policy.codepipeline_policy]
+  name       = "tf-firehawk-deploy-pipeline"
+  role_arn   = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
     location = aws_s3_bucket.codepipeline_bucket.bucket
@@ -58,7 +58,6 @@ resource "aws_codepipeline" "codepipeline" {
 
   stage {
     name = "Deploy"
-
     action {
       name            = "Deploy"
       category        = "Deploy"
@@ -66,22 +65,56 @@ resource "aws_codepipeline" "codepipeline" {
       provider        = "CodeDeploy"
       input_artifacts = ["build_output"]
       version         = "1"
-
       configuration = {
         ApplicationName     = "firehawk-codedeploy-app"
         DeploymentGroupName = "firehawk-deployment-group"
-        # TaskDefinitionTemplateArtifact = "BuildArtifact"
-        # TaskDefinitionTemplatePath = "taskdef.json"
-        # AppSpecTemplateArtifact = "BuildArtifact"
-        # AppSpecTemplatePath = "appspec.yml"
       }
-      #   configuration = {
-      #     ActionMode     = "REPLACE_ON_FAILURE"
-      #     Capabilities   = "CAPABILITY_AUTO_EXPAND,CAPABILITY_IAM"
-      #     OutputFileName = "CreateStackOutput.json"
-      #     StackName      = "MyStack"
-      #     TemplatePath   = "build_output::sam-templated.yaml"
-      #   }
+    }
+  }
+  stage {
+    name = "Destroy Requires Approval"
+    action {
+      name     = "Approval"
+      category = "Approval"
+      owner    = "AWS"
+      provider = "Manual"
+      version  = "1"
+      configuration {
+        # NotificationArn = "${var.approve_sns_arn}"
+        CustomData = "Approval of this step will configure the app to destroy Firehawk infrastructure."
+        # ExternalEntityLink = "${var.approve_url}"
+      }
+    }
+  }
+  stage {
+    name = "Build-Destroy"
+    action {
+      name             = "Build"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["build_destroy_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = "firehawk-destroyapp"
+      }
+    }
+  }
+  stage {
+    name = "Destroy"
+    action {
+      name            = "Deploy"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "CodeDeploy"
+      input_artifacts = ["build_destroy_output"]
+      version         = "1"
+      configuration = {
+        ApplicationName     = "firehawk-codedeploy-app"
+        DeploymentGroupName = "firehawk-deployment-group"
+      }
     }
   }
 }
