@@ -79,7 +79,7 @@ resource "aws_codepipeline" "codepipeline" {
       owner    = "AWS"
       provider = "Manual"
       version  = "1"
-      configuration {
+      configuration = {
         # NotificationArn = "${var.approve_sns_arn}"
         CustomData = "Approval of this step will configure the app to destroy Firehawk infrastructure."
         # ExternalEntityLink = "${var.approve_url}"
