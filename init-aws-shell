@@ -36,5 +36,51 @@ cp -fr $SCRIPTDIR $targetdir/.
 cd $targetdir/$dirname
 
 $targetdir/$dirname/install-packages
+
+# check existance of ssm parameter for git_repo_id.  Required.
+get_parameters=$( aws ssm get-parameters --names \
+  "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" )
+num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
+changed="false"
+regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+ask="false"
+
+if [[ ! $num_invalid -eq 0 ]]; then
+  ask="true"
+else
+  git_repo_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id\")|.Value" --raw-output)
+  if [[ ! "$git_repo_id" =~ "$regex" ]]; then
+    echo "Present SSM Parameter format of value git_repo_id is incorrect. Should be eg: mygitusername/firehawk"
+    ask="true"
+  fi
+fi
+
+if [[ "$ask" == "true" ]]; then
+  echo ""
+  echo "You must have your own fork of firehawkvfx/firehawk in github to continue to trigger automation within your control."
+  echo "Ensure you have made your own fork of github.com/firehawkvfx/firehawk and continue."
+  echo ""
+  echo "Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are tested, private repos are not tested):"
+  read -p "Enter git repo id (eg: mygitusername/firehawk) : " git_repo_id
+  echo ""
+  
+  while [[ ! "$git_repo_id" =~ "$regex" ]]; do
+    echo "Format is incorrect.  eg: mygitusername/firehawk"
+    read -p "Enter git repo id (eg: mygitusername/firehawk) : " git_repo_id
+    echo ""
+  done
+  changed="true"
+fi
+
+if [[ "$changed" == "true" ]]; then;
+  echo "...Setting git_repo_id: $git_repo_id"
+  aws ssm put-parameter \
+      --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" \
+      --description "The ID of your git repo fork of firehawk. eg: mygitusername/firehawk" \
+      --value "$git_repo_id" \
+      --type "String" \
+      --tier Advanced
+fi
+
 source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
 $targetdir/$dirname/init/init-aws-shell

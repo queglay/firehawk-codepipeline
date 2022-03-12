@@ -105,6 +105,7 @@ variable "vault_vpc_subnet_count" { # If adjusting the max here, consider 2^new_
 variable "combined_vpcs_cidr" {
   description = "Terraform will automatically configure multiple VPCs and subnets within this CIDR range for any resourcetier ( dev / green / blue / main )."
   type        = string
+  default     = "10.1.0.0/16"
 }
 
 variable "common_tags" {
