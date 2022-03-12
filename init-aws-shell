@@ -54,11 +54,13 @@ if [[ ! $num_invalid -eq 0 ]]; then
   echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id"
 else
   git_repo_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id\")|.Value" --raw-output)
-  if [[ ! $git_repo_id =~ $regex ]]; then
+  if [[ $git_repo_id =~ $regex ]]; then
+    echo "...Retrieved git_repo_id: $git_repo_id"
+  else
     echo ""
-    echo "Present SSM Parameter format of value git_repo_id is incorrect or not set.  value: $git_repo_id"
+    echo "Present SSM Parameter format of value git_repo_id is incorrect or not set.  Current value: $git_repo_id"
     echo "get_parameters: $get_parameters"
-    echo "Should be of formate example: mygitusername/firehawk"
+    echo "Should be of format example: mygitusername/firehawk"
     ask="true"
   fi
 fi
