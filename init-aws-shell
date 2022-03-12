@@ -44,16 +44,21 @@ get_parameters=$( aws ssm get-parameters --names \
 num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
 changed="false"
 regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+
 ask="false"
 
 if [[ ! $num_invalid -eq 0 ]]; then
   ask="true"
+  echo ""
   echo "SSM parameter not yet set"
   echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id"
 else
   git_repo_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id\")|.Value" --raw-output)
   if [[ ! "$git_repo_id" =~ "$regex" ]]; then
-    echo "Present SSM Parameter format of value git_repo_id is incorrect. Should be eg: mygitusername/firehawk"
+    echo ""
+    echo "Present SSM Parameter format of value git_repo_id is incorrect or not set.  value: $git_repo_id"
+    echo "get_parameters: $get_parameters"
+    echo "Should be eg: mygitusername/firehawk"
     ask="true"
   fi
 fi
