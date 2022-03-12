@@ -44,7 +44,8 @@ function get_and_set_parm {
   local -r parameter_description="$3"
   local -r parameter_requirements="$4"
   local -r regex="$5"
-  local -r parameter_value_default="$6"
+  local -r test_cidr="$6"
+  local -r parameter_value_default="$7"
 
   # check existance of ssm parameter for parameter name.  Required.
   get_parameters=$( aws ssm get-parameters --names \
@@ -60,15 +61,21 @@ function get_and_set_parm {
     echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
   else
     parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
-    if [[ $parameter_value =~ $regex ]]; then
-      echo "...Retrieved ${parameter_name}: $parameter_value"
-    else
-      echo ""
-      echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
-      echo "get_parameters: $get_parameters"
-      echo "Should be of format example: $parameter_example"
-      ask="true"
+    if [[ ! -z "$regex" ]]; then
+      if [[ $parameter_value =~ $regex ]]; then
+        echo "...Retrieved ${parameter_name}: $parameter_value"
+      else
+        echo ""
+        echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+        echo "get_parameters: $get_parameters"
+        echo "Should be of format example: $parameter_example"
+        ask="true"
+      fi
+    elif [[ "$test_cidr" == "true" ]]; then
+      fn_test_cidr "$parameter_value"
     fi
+
+
   fi
 
   if [[ "$ask" == "true" ]]; then
@@ -79,12 +86,13 @@ function get_and_set_parm {
       parameter_value=${parameter_value:-$parameter_value_default}
     fi
     echo ""
-    
-    while [[ ! "$parameter_value" =~ "$regex" ]]; do
-      echo "Format is incorrect.  eg: $parameter_example"
-      read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
-      echo ""
-    done
+    if [[ ! -z "$regex" ]]; then
+      while [[ ! "$parameter_value" =~ "$regex" ]]; do
+        echo "Format is incorrect.  eg: $parameter_example"
+        read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
+        echo ""
+      done
+    fi
     changed="true"
   fi
 
@@ -110,8 +118,9 @@ Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are
 EOF
 )
 regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+test_cidr="false"
 parameter_value_default=""
-get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$parameter_value_default"
+get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
 
 parameter_name="combined_vpcs_cidr"
 parameter_example="10.1.0.0/16"
@@ -124,9 +133,10 @@ eg: 10.4.0.0/16 will not interfere with 192.168.1.0/24. eg: dev=10.1.0.0/16, blu
 Specify IP range used for all cloud VPC's:
 EOF
 )
-regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+regex=""
+test_cidr="true"
 parameter_value_default="10.1.0.0/16"
-get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$parameter_value_default"
+get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
 
 source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
 $targetdir/$dirname/init/init-aws-shell
