@@ -82,14 +82,14 @@ if [[ "$ask" == "true" ]]; then
   changed="true"
 fi
 
-if [[ "$changed" == "true" ]]; then;
+if [[ "$changed" == "true" ]]; then
   echo "...Setting git_repo_id: $git_repo_id"
   aws ssm put-parameter \
-      --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" \
-      --description "The ID of your git repo fork of firehawk. eg: mygitusername/firehawk" \
-      --value "$git_repo_id" \
-      --type "String" \
-      --tier Advanced
+    --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" \
+    --description "The ID of your git repo fork of firehawk. eg: mygitusername/firehawk" \
+    --value "$git_repo_id" \
+    --type "String" \
+    --tier Advanced
 fi
 
 source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
