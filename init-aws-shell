@@ -38,59 +38,95 @@ cd $targetdir/$dirname
 
 $targetdir/$dirname/install-packages
 
-# check existance of ssm parameter for git_repo_id.  Required.
-get_parameters=$( aws ssm get-parameters --names \
-  "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" )
-num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
-changed="false"
-regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+function get_and_set_parm {
+  local -r parameter_name="$1"
+  local -r parameter_example="$2"
+  local -r parameter_description="$3"
+  local -r parameter_requirements="$4"
+  local -r regex="$5"
+  local -r parameter_value_default="$6"
 
-ask="false"
+  # check existance of ssm parameter for parameter name.  Required.
+  get_parameters=$( aws ssm get-parameters --names \
+    "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" )
+  num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
+  changed="false"
+  ask="false"
 
-if [[ ! $num_invalid -eq 0 ]]; then
-  ask="true"
-  echo ""
-  echo "SSM parameter not yet set"
-  echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id"
-else
-  git_repo_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id\")|.Value" --raw-output)
-  if [[ $git_repo_id =~ $regex ]]; then
-    echo "...Retrieved git_repo_id: $git_repo_id"
-  else
-    echo ""
-    echo "Present SSM Parameter format of value git_repo_id is incorrect or not set.  Current value: $git_repo_id"
-    echo "get_parameters: $get_parameters"
-    echo "Should be of format example: mygitusername/firehawk"
+  if [[ ! $num_invalid -eq 0 ]]; then
     ask="true"
-  fi
-fi
-
-if [[ "$ask" == "true" ]]; then
-  echo ""
-  echo "You must have your own fork of firehawkvfx/firehawk in github to continue to trigger automation within your control."
-  echo "Ensure you have made your own fork of github.com/firehawkvfx/firehawk and continue."
-  echo ""
-  echo "Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are tested, private repos are not tested):"
-  read -p "Enter git repo id (eg: mygitusername/firehawk) : " git_repo_id
-  echo ""
-  
-  while [[ ! "$git_repo_id" =~ "$regex" ]]; do
-    echo "Format is incorrect.  eg: mygitusername/firehawk"
-    read -p "Enter git repo id (eg: mygitusername/firehawk) : " git_repo_id
     echo ""
-  done
-  changed="true"
-fi
+    echo "SSM parameter not yet set"
+    echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
+  else
+    parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
+    if [[ $parameter_value =~ $regex ]]; then
+      echo "...Retrieved ${parameter_name}: $parameter_value"
+    else
+      echo ""
+      echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+      echo "get_parameters: $get_parameters"
+      echo "Should be of format example: $parameter_example"
+      ask="true"
+    fi
+  fi
 
-if [[ "$changed" == "true" ]]; then
-  echo "...Setting git_repo_id: $git_repo_id"
-  aws ssm put-parameter \
-    --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id" \
-    --description "The ID of your git repo fork of firehawk. eg: mygitusername/firehawk" \
-    --value "$git_repo_id" \
-    --type "String" \
-    --tier Advanced
-fi
+  if [[ "$ask" == "true" ]]; then
+    echo ""
+    echo "$parameter_requirements"
+    read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
+    if [[ ! -z "$parameter_value_default" ]]; then
+      parameter_value=${parameter_value:-$parameter_value_default}
+    fi
+    echo ""
+    
+    while [[ ! "$parameter_value" =~ "$regex" ]]; do
+      echo "Format is incorrect.  eg: $parameter_example"
+      read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
+      echo ""
+    done
+    changed="true"
+  fi
+
+  if [[ "$changed" == "true" ]]; then
+    echo "...Setting $parameter_name: $parameter_value"
+    aws ssm put-parameter \
+      --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
+      --description "$parameter_description" \
+      --value "$parameter_value" \
+      --type "String" \
+      --tier Advanced
+  fi
+}
+
+parameter_name="git_repo_id"
+parameter_example="mygitusername/firehawk"
+parameter_description="The ID of your git repo fork of firehawk. eg: $parameter_example"
+parameter_requirements=$(cat << EOF
+You must have your own fork of firehawkvfx/firehawk in github to continue to trigger automation within your control.
+Ensure you have made your own fork of github.com/firehawkvfx/firehawk and continue.
+
+Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are tested, private repos are not tested):
+EOF
+)
+regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+parameter_value_default=""
+get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$parameter_value_default"
+
+parameter_name="combined_vpcs_cidr"
+parameter_example="10.1.0.0/16"
+parameter_description="The IP range used for all cloud VPC's. eg: $parameter_example"
+parameter_requirements=$(cat << EOF
+The IP range used for the main and rendering VPCs.
+Cloud hosts will reside within this range and it must not intersect with your private network range.
+eg: 10.4.0.0/16 will not interfere with 192.168.1.0/24. eg: dev=10.1.0.0/16, blue=10.2.0.0/16, green=10.3.0.0/16, main=10.4.0.0/16
+
+Specify IP range used for all cloud VPC's:
+EOF
+)
+regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+parameter_value_default="10.1.0.0/16"
+get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$parameter_value_default"
 
 source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
 $targetdir/$dirname/init/init-aws-shell
