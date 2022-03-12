@@ -2,6 +2,7 @@
 
 # defaults
 resourcetier="dev"
+export TF_VAR_resourcetier="$resourcetier"
 
 set -e
 
@@ -47,6 +48,8 @@ ask="false"
 
 if [[ ! $num_invalid -eq 0 ]]; then
   ask="true"
+  echo "SSM parameter not yet set"
+  echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id"
 else
   git_repo_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/git_repo_id\")|.Value" --raw-output)
   if [[ ! "$git_repo_id" =~ "$regex" ]]; then
