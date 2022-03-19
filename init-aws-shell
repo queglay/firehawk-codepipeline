@@ -107,7 +107,9 @@ function get_and_set_parm {
 
     if [[ $exit_status -eq 0 ]]; then
       ask="false"
-      return
+      # return
+    else
+      echo "Error Setting parameter."
     fi
 
     # if [[ ! -z "$regex" ]]; then
@@ -118,7 +120,7 @@ function get_and_set_parm {
     #   done
     # fi
     # changed="true"
-  fi
+  done
 
   # if [[ "$changed" == "true" ]]; then
   #   echo "...Setting $parameter_name: $parameter_value"
