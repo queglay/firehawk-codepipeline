@@ -2,6 +2,7 @@
 
 # defaults
 resourcetier="dev"
+DEFAULT_ASK="true"
 export TF_VAR_resourcetier="$resourcetier"
 
 set -e
@@ -52,36 +53,38 @@ function get_and_set_parm {
     "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" )
   num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
   # changed="false"
-  ask="false"
+  ask="$DEFAULT_ASK"
 
-  if [[ ! $num_invalid -eq 0 ]]; then
-    ask="true"
-    echo ""
-    echo "SSM parameter not yet set"
-    echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
-  else
-    parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
-    # if [[ ! -z "$regex" ]]; then
-    #   if [[ $parameter_value =~ $regex ]]; then
-    #     echo "...Retrieved ${parameter_name}: $parameter_value"
-    #   else
-    #     echo ""
-    #     echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
-    #     echo "get_parameters: $get_parameters"
-    #     echo "Should be of format example: $parameter_example"
-    #     ask="true"
-    #   fi
-    # elif [[ "$test_cidr" == "true" ]]; then
-    #   fn_test_cidr "$parameter_value"
-    # fi
-    echo "...Retrieved ${parameter_name}: $parameter_value"
-    if [[ -z "$parameter_value" ]]; then
-      echo ""
-      echo "Paremeter value is empty."
-      echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
-      echo "get_parameters: $get_parameters"
-      echo "Should be of format example: $parameter_example"
+  if [[ "$ask" == "false" ]]; then #: determine if ask needs to be set to true here.
+    if [[ ! $num_invalid -eq 0 ]]; then
       ask="true"
+      echo ""
+      echo "SSM parameter not yet set"
+      echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
+    else
+      parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
+      # if [[ ! -z "$regex" ]]; then
+      #   if [[ $parameter_value =~ $regex ]]; then
+      #     echo "...Retrieved ${parameter_name}: $parameter_value"
+      #   else
+      #     echo ""
+      #     echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+      #     echo "get_parameters: $get_parameters"
+      #     echo "Should be of format example: $parameter_example"
+      #     ask="true"
+      #   fi
+      # elif [[ "$test_cidr" == "true" ]]; then
+      #   fn_test_cidr "$parameter_value"
+      # fi
+      echo "...Retrieved ${parameter_name}: $parameter_value"
+      if [[ -z "$parameter_value" ]]; then
+        echo ""
+        echo "Paremeter value is empty."
+        echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+        echo "get_parameters: $get_parameters"
+        echo "Should be of format example: $parameter_example"
+        ask="true"
+      fi
     fi
   fi
 
@@ -166,4 +169,4 @@ parameter_value_default="10.1.0.0/16"
 get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
 
 source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
-$targetdir/$dirname/init/init-aws-shell
+# $targetdir/$dirname/init/init-aws-shell
