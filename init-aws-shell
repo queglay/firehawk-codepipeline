@@ -51,7 +51,7 @@ function get_and_set_parm {
   get_parameters=$( aws ssm get-parameters --names \
     "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" )
   num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
-  changed="false"
+  # changed="false"
   ask="false"
 
   if [[ ! $num_invalid -eq 0 ]]; then
@@ -61,24 +61,31 @@ function get_and_set_parm {
     echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
   else
     parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
-    if [[ ! -z "$regex" ]]; then
-      if [[ $parameter_value =~ $regex ]]; then
-        echo "...Retrieved ${parameter_name}: $parameter_value"
-      else
-        echo ""
-        echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
-        echo "get_parameters: $get_parameters"
-        echo "Should be of format example: $parameter_example"
-        ask="true"
-      fi
-    elif [[ "$test_cidr" == "true" ]]; then
-      fn_test_cidr "$parameter_value"
+    # if [[ ! -z "$regex" ]]; then
+    #   if [[ $parameter_value =~ $regex ]]; then
+    #     echo "...Retrieved ${parameter_name}: $parameter_value"
+    #   else
+    #     echo ""
+    #     echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+    #     echo "get_parameters: $get_parameters"
+    #     echo "Should be of format example: $parameter_example"
+    #     ask="true"
+    #   fi
+    # elif [[ "$test_cidr" == "true" ]]; then
+    #   fn_test_cidr "$parameter_value"
+    # fi
+    echo "...Retrieved ${parameter_name}: $parameter_value"
+    if [[ -z "$parameter_value" ]]; then
+      echo ""
+      echo "Paremeter value is empty."
+      echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+      echo "get_parameters: $get_parameters"
+      echo "Should be of format example: $parameter_example"
+      ask="true"
     fi
-
-
   fi
 
-  if [[ "$ask" == "true" ]]; then
+  while [[ "$ask" == "true" ]]; do
     echo ""
     echo "$parameter_requirements"
     read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
@@ -86,25 +93,43 @@ function get_and_set_parm {
       parameter_value=${parameter_value:-$parameter_value_default}
     fi
     echo ""
-    if [[ ! -z "$regex" ]]; then
-      while [[ ! "$parameter_value" =~ "$regex" ]]; do
-        echo "Format is incorrect.  eg: $parameter_example"
-        read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
-        echo ""
-      done
-    fi
-    changed="true"
-  fi
 
-  if [[ "$changed" == "true" ]]; then
     echo "...Setting $parameter_name: $parameter_value"
-    aws ssm put-parameter \
+    output=$(aws ssm put-parameter \
       --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
       --description "$parameter_description" \
       --value "$parameter_value" \
       --type "String" \
       --tier Advanced
+      --allowed-pattern "$regex") && exit_status=0 || exit_status=$?
+
+    echo "$output"
+
+    if [[ $exit_status -eq 0 ]]; then
+      ask="false"
+      return
+    fi
+
+    # if [[ ! -z "$regex" ]]; then
+    #   while [[ ! "$parameter_value" =~ "$regex" ]]; do
+    #     echo "Format is incorrect.  eg: $parameter_example"
+    #     read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
+    #     echo ""
+    #   done
+    # fi
+    # changed="true"
   fi
+
+  # if [[ "$changed" == "true" ]]; then
+  #   echo "...Setting $parameter_name: $parameter_value"
+  #   aws ssm put-parameter \
+  #     --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
+  #     --description "$parameter_description" \
+  #     --value "$parameter_value" \
+  #     --type "String" \
+  #     --tier Advanced
+  #     --allowed-pattern "$regex"
+  # fi
 }
 
 parameter_name="git_repo_id"
@@ -118,7 +143,7 @@ Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are
 EOF
 )
 regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
-test_cidr="false"
+test_cidr="false" #: This is now inactive
 parameter_value_default=""
 get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
 
@@ -134,7 +159,7 @@ Specify IP range used for all cloud VPC's:
 EOF
 )
 regex=""
-test_cidr="true"
+test_cidr="true" #: This is now inactive
 parameter_value_default="10.1.0.0/16"
 get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
 
