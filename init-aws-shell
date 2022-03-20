@@ -137,7 +137,7 @@ function get_and_set_parm {
       --description "$parameter_description" \
       --value "$parameter_value" \
       --type "String" \
-      --tier Advanced \
+      --tier Standard \
       --overwrite \
       --allowed-pattern "$regex") && exit_status=0 || exit_status=$?
 
