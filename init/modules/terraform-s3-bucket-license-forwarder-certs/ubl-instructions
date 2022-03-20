@@ -1,5 +1,15 @@
 #!/bin/bash
 
+EXECDIR="$(pwd)"
+SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+cd $SCRIPTDIR
+
 s3_bucket_name=$(terragrunt output s3_bucket_name)
 
 echo
@@ -10,3 +20,5 @@ echo "${s3_bucket_name}/ublcertszip/certs.zip"
 echo
 echo "This cert zip file is provided by Thinkbox when you purchase UBL credits for the first time for any software.  If you purchase credits for new software for the first time you must update this file."
 echo
+
+cd $EXECDIR
