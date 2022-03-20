@@ -119,7 +119,7 @@ function get_and_set_parm {
     else
       #: and show the current value if present.
       echo
-      echo "...Existing value for ${parameter_name}: $parameter_value"
+      echo "...Got existing parameter value for ${parameter_name}: $parameter_value"
     fi
   fi
 
