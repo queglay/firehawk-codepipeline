@@ -7,6 +7,7 @@ data "aws_caller_identity" "current" {}
 locals {
   common_tags = merge(var.common_tags, { role = "cloudformation bucket" })
   bucket_name = var.cloudformation_bucket
+  s3_bucket_domain_name = aws_s3_bucket.cloudformation_bucket.bucket_domain_name
 }
 
 # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
