@@ -87,7 +87,7 @@ function get_and_set_parm {
   local -r parameter_description="$3"
   local -r parameter_requirements="$4"
   local -r regex="$5"
-  local -r test_cidr="$6"
+  local -r test_url="$6"
   local -r parameter_value_default="$7"
   local ask="$8"
 
@@ -131,23 +131,38 @@ function get_and_set_parm {
     fi
     echo ""
 
-    echo "...Setting $parameter_name: $parameter_value"
-    output=$(aws ssm put-parameter \
-      --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
-      --description "$parameter_description" \
-      --value "$parameter_value" \
-      --type "String" \
-      --tier Standard \
-      --overwrite \
-      --allowed-pattern "$regex") && exit_status=0 || exit_status=$?
-
-    echo "$output"
-
-    if [[ $exit_status -eq 0 ]]; then
-      ask="false"
-    else
-      echo "Error Setting parameter."
+    will_set="true"
+    #: other tests can be performed to validate the parameter before attempting to set.
+    if [[ $test_url == "true" ]]; then
+      url="https://github.com/${parameter_value}"
+      if curl --head --silent --fail "$url" 2> /dev/null; then
+        echo "URL exists."
+      else
+        echo "URL does not exist. Try again."
+        will_set="false"
+      fi
     fi
+
+    if [[ "$will_set" == "true" ]]; then
+      echo "...Setting $parameter_name: $parameter_value"
+      output=$(aws ssm put-parameter \
+        --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
+        --description "$parameter_description" \
+        --value "$parameter_value" \
+        --type "String" \
+        --tier Standard \
+        --overwrite \
+        --allowed-pattern "$regex") && exit_status=0 || exit_status=$?
+
+      echo "$output"
+
+      if [[ $exit_status -eq 0 ]]; then
+        ask="false"
+      else
+        echo "Error Setting parameter."
+      fi
+    fi
+
   done
 }
 
@@ -187,10 +202,11 @@ Ensure you have made your own fork of github.com/firehawkvfx/firehawk and contin
 Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are tested, private repos are not tested):
 EOF
     )
+    #: in bash, backslashes need to be double escaped.
     regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
-    test_cidr="false" #: This is now inactive
+    test_url="true" #: This is now inactive
     parameter_value_default=""
-    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default" "$ask"
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
 
     parameter_name="combined_vpcs_cidr"
     parameter_example="10.1.0.0/16"
@@ -205,16 +221,32 @@ EOF
     )
     #: in bash, backslashes need to be double escaped.
     regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
-    test_cidr="true" #: This is now inactive
+    test_url="false" #: This is now inactive
     parameter_value_default="10.1.0.0/16"
-    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default" "$ask"
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
+
+    parameter_name="global_bucket_extension"
+    parameter_example="mywebsite.com"
+    parameter_description="The global bucket extension for all S3 buckets that will be created. eg: $parameter_example"
+    parameter_requirements=$(cat << EOF
+The suffix used for all S3 cloud storage buckets created by the deployment.
+Also used for encrypted terraform state.  This must be a globally unique name,
+like a domain name you own, or derived from an email addess with no special characters.
+eg: example.com
+eg: myemailatgmaildotcom
+
+Specify a global bucket extension for cloud storage:
+EOF
+    )
+    #: in bash, backslashes need to be double escaped.
+    regex="^[0-9a-zA-Z]+([0-9a-zA-Z-.]*[0-9a-zA-Z])*$"
+    test_url="false" #: This is now inactive
+    parameter_value_default=""
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
 
     source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
-    $targetdir/$dirname/init/init-aws-shell
-
+    # $targetdir/$dirname/init/init-aws-shell
   fi
 }
 
 options "$@"
-
-
