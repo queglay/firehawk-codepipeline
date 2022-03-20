@@ -246,7 +246,7 @@ EOF
     get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
 
     source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
-    # $targetdir/$dirname/init/init-aws-shell
+    $targetdir/$dirname/init/init-aws-shell
   fi
 }
 
