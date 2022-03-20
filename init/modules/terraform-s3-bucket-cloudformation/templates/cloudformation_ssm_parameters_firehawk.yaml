@@ -13,7 +13,7 @@ Metadata:
           - organizationname
           - globalbucketextension
           - gitrepoid
-          - combinedvpcscidr
+          - combined_vpcs_cidr
           - onsitepublicip
       - 
         Label: 
@@ -80,7 +80,7 @@ Metadata:
         default: "The name of the organization to associate with certificates (e.g. My Company)"
       validityperiodhours:
         default: "The validity period for the Vault/Consul SSL Certificate Authority (CA) in hours"
-      combinedvpcscidr: 
+      combined_vpcs_cidr: 
         default: "The CIDR Range containing all cloud resources."
       onsitepublicip:
         default: "Your Public IP Address onsite. This will be used for configuring security groups."
@@ -149,7 +149,7 @@ Parameters:
     Type: String
     AllowedPattern: "[0-9]*"
     Default: 8760
-  combinedvpcscidr:
+  combined_vpcs_cidr:
     Description: 'The IP range used for the main and rendering VPCs.  Cloud hosts will reside within this range and it must not intersect with your private network range. eg: 10.4.0.0/16 will not interfere with 192.168.1.0/24. eg: dev=10.1.0.0/16, blue=10.2.0.0/16, green=10.3.0.0/16, main=10.4.0.0/16'
     Type: String
     Default: "10.1.0.0/16" # if this default is changed, ensure the terraform var default is also changed
@@ -283,7 +283,7 @@ Resources:
           - Ref: resourcetier
           - /combined_vpcs_cidr
       Type: String
-      Value: !Ref combinedvpcscidr
+      Value: !Ref combined_vpcs_cidr
       Description: 'The IP range used for the main VPC.'
   SSMOrganizationName:
     Type: AWS::SSM::Parameter
