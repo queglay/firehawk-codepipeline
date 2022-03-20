@@ -107,7 +107,7 @@ function get_and_set_parm {
     #: We always check the value isn't empty.
     parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
     if [[ -z "$parameter_value" ]]; then
-      echo ""
+      echo
       echo "Parameter value is empty."
       echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
       echo "get_parameters: $get_parameters"
@@ -115,7 +115,8 @@ function get_and_set_parm {
       ask="true"
     else
       #: and show the current value if present.
-      echo "...Retrieved ${parameter_name}: $parameter_value"
+      echo
+      echo "...Existing value for ${parameter_name}: $parameter_value"
     fi
   fi
 
