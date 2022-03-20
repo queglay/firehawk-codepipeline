@@ -1,7 +1,11 @@
-provider "aws" {
-  #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
-  # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 3.15.0"
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.15.0"
+    }
+  }
+  required_version = ">= 0.13"
 }
 
 resource "random_pet" "env" {
@@ -28,7 +32,7 @@ resource "aws_ssm_parameter" "vault_kms_token" {
   type      = "SecureString"
   overwrite = true
   value     = aws_kms_key.vault.id
-  tags      = merge(map("Name", "vault_kms_token_key_id"), local.common_tags)
+  tags      = merge(tomap({"Name": "vault_kms_token_key_id"}), local.common_tags)
 }
 
 data "aws_ssm_parameter" "vault_kms_token" {
