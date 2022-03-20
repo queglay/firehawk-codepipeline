@@ -28,10 +28,16 @@ quick_create_url="https://console.aws.amazon.com/cloudformation/home?region=${AW
 echo 
 echo "Configuration instructions:"
 echo
-echo "If this is your first time setting up:"
+echo "If this is your first time deploying:"
+echo
 echo "  1.  After completing the UBL Instructions provided in this log above, continue."
 echo "      Without the UBL credentials .zip in your bucket, you can't render with deadline."
-echo "  2.  You must configure more parameters before deployment using the cloudformation template here:"
+echo
+echo "  2.  You must configure more parameters before deployment using the cloudformation template"
+echo "      URL below."
+echo "      If you have already done this, and only want to make changes, do not use this link."
+echo "      Instead, go to Cloudformation in the AWS Console and update the template manually."
+echo
 echo "      ${quick_create_url}"
 
 cd $EXECDIR
