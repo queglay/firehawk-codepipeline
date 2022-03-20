@@ -2,7 +2,7 @@
 resource "aws_iam_role" "service_role" {
   name = "aws-ec2-spot-fleet-tagging-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags = merge( var.common_tags, map( "role", "deadline") )
+  tags = merge( var.common_tags, tomap({"role": "deadline"}) )
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole"
   ]

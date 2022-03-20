@@ -2,7 +2,7 @@
 resource "aws_iam_role" "instance_role" {
   name               = var.provisioner_iam_profile_name
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags               = merge(var.common_tags, map("role", "provisioner"))
+  tags               = merge(var.common_tags, tomap({ "role" : "provisioner" }))
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/IAMFullAccess",
     "arn:aws:iam::aws:policy/AdministratorAccess",
