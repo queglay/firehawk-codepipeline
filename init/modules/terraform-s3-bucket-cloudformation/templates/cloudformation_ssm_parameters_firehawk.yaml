@@ -1,0 +1,611 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Shared parameters for a Firehawk deployment.
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration"
+        Parameters: 
+          - resourcetier
+          - organizationname
+          - globalbucketextension
+          - gitrepoid
+          - combinedvpcscidr
+          - onsitepublicip
+      - 
+        Label: 
+          default: "VPN Automation"
+        Parameters: 
+          - onsiteprivatesubnetcidr
+          - onsiteprivatevpnip
+          - vpncidr
+          - onsiteuserpublickey
+      - 
+        Label: 
+          default: "Deadline Automation"
+        Parameters: 
+          - ublurl
+          - ublactivationcode
+      - 
+        Label: 
+          default: "Houdini Automation"
+        Parameters: 
+          - sesiclientid
+          - sesiclientsecretkey
+          - maxspotcapacityengine
+          - maxspotcapacitymantra
+      - 
+        Label: 
+          default: "Houdini Floating License Server"
+        Parameters:
+          - houdinilicenseserverenabled
+          - houdinilicenseserveraddress
+      - 
+        Label: 
+          default: "Storage: Production Storage Path"
+        Parameters: 
+          - prodmounttarget
+      - 
+        Label: 
+          default: "Storage: S3 File Gateway NFS Share (Cloud)"
+        Parameters:
+          - clouds3gateway
+          - clouds3gatewaymounttarget
+          - clouds3gatewaysize
+      - 
+        Label: 
+          default: "Storage: FSx for Lustre (Cloud)"
+        Parameters:
+          - cloudfsxstorage
+          - cloudfsxmounttarget
+      - 
+        Label: 
+          default: "Storage: Shared NFS Storage (from Onsite)"
+        Parameters: 
+          - onsitestorage
+          - onsitenfsexport
+          - onsitenfsmounttarget
+      - 
+        Label: 
+          default: "Advanced Settings (Default values can be left unchanged) "
+        Parameters: 
+          - validityperiodhours
+    ParameterLabels: 
+      resourcetier: 
+        default: "Deployment Environment (resourcetier)"
+      organizationname:
+        default: "The name of the organization to associate with certificates (e.g. My Company)"
+      validityperiodhours:
+        default: "The validity period for the Vault/Consul SSL Certificate Authority (CA) in hours"
+      combinedvpcscidr: 
+        default: "The CIDR Range containing all cloud resources."
+      onsitepublicip:
+        default: "Your Public IP Address onsite. This will be used for configuring security groups."
+      onsiteprivatesubnetcidr:
+        default: "Your onsite private subnet CIDR range.  Used to configure routing with Open VPN."
+      onsiteprivatevpnip:
+        default: "Your intended static IP for the Open VPN virtual machine."
+      vpncidr:
+        default: "The CIDR range Open VPN will use internally for routing"
+      onsiteuserpublickey:
+        default: "The public key for your remote user that will SSH to retrieve VPN credentials and other vault data."
+      globalbucketextension:
+        default: "Your Global Bucket Extension."
+      gitrepoid:
+        default: "The repo id for your fork in your github account."
+      ublurl:
+        default: "Your Deadline Usage Based Licensing URL."
+      ublactivationcode:
+        default: "Your Deadline Usage Based Licensing activation code."
+      houdinilicenseserverenabled:
+        default: "Do you have an floating license server to use?"
+      houdinilicenseserveraddress:
+        default: "Your Houdini License Server IP Address."
+      sesiclientid:
+        default: "Your Side FX Account API Client ID."
+      sesiclientsecretkey:
+        default: "Your Side FX Account API Secret Key"
+      maxspotcapacityengine:
+        default: "The maximum number of spot instances to launch for each Houdini Engine Deadline group."
+      maxspotcapacitymantra:
+        default: "The maximum number of spot instances to launch for each Houdini Mantra Deadline group."
+      onsitestorage:
+        default: "Do you have an onsite volume to mount over the VPN (NFS)?"
+      onsitenfsexport:
+        default: "The mount export path used to mount your NFS share."
+      onsitenfsmounttarget:
+        default: "The target path used to mount your NFS share to."
+      clouds3gateway:
+        default: "Do you want to launch an File Gateway in EC2 to cache S3 as NFS? This can be mounted to cloud nodes and onsite (Linux, Mac, Windows)"
+      clouds3gatewaymounttarget:
+        default: "The target path used to mount the S3 File Gateway NFS share to on render nodes."
+      clouds3gatewaysize:
+        default: "The size in GB of the File Gateway cache (EBS volume)"
+      cloudfsxstorage:
+        default: "Do you want to launch FSx to mount to cloud nodes (Lustre)?"
+      cloudfsxmounttarget:
+        default: "The target path used to mount the FSX for Lustre storage share to."
+      prodmounttarget:
+        default: "The production mount target path (The default path for production resources)."
+Parameters:
+  resourcetier:
+    Description: 'The resource tier uniquely defining the deployment area.  eg: dev/blue/green/main.'
+    Type: String
+    AllowedValues:
+    - dev
+    - blue
+    - green
+    - main
+    Default: dev
+  organizationname:
+    Description: 'The organization name will be used to associate with generated certificates'
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9 ]*"
+  validityperiodhours:
+    Description: 'The Root CA and AMI images will expire after this TTL (Time To Live) period.'
+    Type: String
+    AllowedPattern: "[0-9]*"
+    Default: 8760
+  combinedvpcscidr:
+    Description: 'The IP range used for the main and rendering VPCs.  Cloud hosts will reside within this range and it must not intersect with your private network range. eg: 10.4.0.0/16 will not interfere with 192.168.1.0/24. eg: dev=10.1.0.0/16, blue=10.2.0.0/16, green=10.3.0.0/16, main=10.4.0.0/16'
+    Type: String
+    Default: "10.1.0.0/16" # if this default is changed, ensure the terraform var default is also changed
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+  onsitepublicip:
+    Description: 'The public IP of your onsite connection used to connect to the cloud infra. Google "what is my ip" for the value. If you do not have a static IP, Terraform may need to update more frequently.'
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  onsiteprivatesubnetcidr:
+    Description: 'The private subnet IP range used for your onsite hosts.  Your router will usually use DHCP to place hosts within this range. eg: 192.168.29.0/24'
+    Type: String
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+  onsiteprivatevpnip:
+    Description: 'The private IP intended for the VPN virtual machine. This will reside in your onsite subnet, and the static address should be reserved in your router when possible. eg dev=192.168.29.10, blue=192.168.29.20, green=192.168.29.30, main=192.168.29.40'
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  vpncidr:
+    Description: 'The IP range open VPN will use internally for routing.  The default should be fine for most purposes. eg: dev=172.17.232.0/24, blue=172.18.232.0/24, green=172.19.232.0/24, main=172.20.232.0/24'
+    Type: String
+    Default: "172.17.232.0/24"
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+  onsiteuserpublickey:
+    Description: 'Your SSH public key located at ~/.ssh/id_rsa.pub (CAUTION: Do not use your private key).  The public key will be used by vault to generate an SSH certificate, enabling SSH authentication to other hosts. It can be retrieved by the commmand: "cat ~/.ssh/id_rsa.pub"'
+    Type: String
+  sesiclientid:
+    Description: 'The client secret key generated from your Side FX Account to automatically download Houdini.'
+    Type: String
+  sesiclientsecretkey:
+    NoEcho: true
+    Description: 'The client ID generated from your Side FX Account to automatically download Houdini.'
+    Type: String
+  maxspotcapacityengine:
+    Description: 'Each Deadline group for Houdini Engine can be limited to a total number of spot instances.  This is not the total, it is only a maximum per group.'
+    Default: "25"
+    Type: String
+  maxspotcapacitymantra:
+    Description: 'Each Deadline group for Houdini Mantra can be limited to a total number of spot instances.  This is not the total, it is only a maximum per group.'
+    Default: "30"
+    Type: String
+  houdinilicenseserverenabled:
+    Description: 'Do you have floating Houdini licenses you wish to use?  This may be from the SESI Cloud hosted license server, or your own over VPN.'
+    Type: String
+    AllowedValues:
+    - false
+    - true
+    Default: false
+  houdinilicenseserveraddress:
+    Description: "The IP or host name of your Houdini license server (IP Address is recommended to simplify usage across sites with private DNS). Specify 0.0.0.0 if you don't have one. Specify https://www.sidefx.com/license/sesinetd if you wish to use the SESI Cloud hosted license server."
+    Type: String
+    Default: "0.0.0.0"
+    # AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  globalbucketextension:
+    Description: 'The suffix used for all S3 cloud storage buckets created by the deployment and for encrypted terraform state.  This must be a globally unique name, like a domain name you own, or derived from an email addess with no special characters. eg1: example.com  eg2: myemailatgmaildotcom'
+    Type: String
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-.]*[0-9a-zA-Z])*$"
+    ConstraintDescription: bucket name can include numbers, lowercase letters, uppercase letters, dots (.) and hyphens (-). It cannot start or end with a dot (.) or hyphen (-).
+  gitrepoid:
+    Description: 'To automate deployment, you must fork the firehawkvfx/firehawk repo to your own account and provide that repo id here. eg: mygitusername/firehawk'
+    Type: String
+    AllowedPattern: "[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+  ublurl:
+    Description: 'The URL provided by Thinkbox for your Usage Based Licencing credits.  Rendernodes on AWS get deadline free, but if you require UBL software licences for other packages or for your onsite workstations you will need to purchase credits.'
+    Type: String
+    AllowedPattern: "^https.*"
+    ConstraintDescription: URL should start with https://thinkbox.compliance.flexnetoperations.com
+  ublactivationcode:
+    NoEcho: true
+    Description: 'The 16 digit activation code provided by Thinkbox for your usage based licencing. eg: 3JNF-V8B7-3JDN-48GN'
+    Type: String
+    AllowedPattern: "^.{19}$"
+    ConstraintDescription: The provided string must be 16 digits.
+  onsitestorage:
+    Description: 'Do you have onsite NFS storage you wish to mount over VPN? (Recommended for PDG)'
+    Type: String
+    AllowedValues:
+    - false
+    - true
+    Default: false
+  onsitenfsexport:
+    Description: 'The onsite NFS export path. (This is the first arg in /etc/fstab used to mount the NFS share).'
+    Type: String
+    Default: 'NAS_IP:/prod'
+  onsitenfsmounttarget:
+    Description: 'The mount target for the NFS share on the remote nodes. This is an absolute path to the storage at your location. (This is the second arg in /etc/fstab used to mount the NFS share).'
+    Type: String
+    Default: '/Volumes/onsite_prod'
+  clouds3gateway:
+    Description: 'Do you want cloud nodes to have access to a shared network mount using S3 File Gateway? This allows an S3 bucket to be read and written to via NFS.'
+    Type: String
+    AllowedValues:
+    - false
+    - true
+    Default: true
+  clouds3gatewaymounttarget:
+    Description: 'The unique mount target for the File Gateway NFS share on the remote nodes. This is an absolute path to the storage at the cloud location. (This is the second arg in /etc/fstab used to mount the NFS share).'
+    Type: String
+    Default: '/Volumes/cloud_prod'
+  clouds3gatewaysize:
+    Description: 'The file gateway needs a cache large enough to operate on working data to reduce S3 requests (min 150 GB).'
+    Default: "150"
+    Type: String
+  cloudfsxstorage:
+    Description: 'Do you want cloud nodes to have access to a high performance shared network mount using FSx for Lustre? This is also an S3 gateway.  You should not use this if also using the S3 File Gateway.'
+    Type: String
+    AllowedValues:
+    - false
+    - true
+    Default: false
+  cloudfsxmounttarget:
+    Description: 'The unique mount target for the FSX share on the remote nodes. This is an absolute path to the storage at the cloud location. (This is the second arg in /etc/fstab used to mount the NFS share).'
+    Type: String
+    Default: '/Volumes/cloud_fsx_prod'
+  prodmounttarget:
+    Description: 'The production mount target for the nearest storage available based on location. (This is a bind mount in /etc/fstab used to mount the nearest/fastest storage available depending on location).'
+    Type: String
+    Default: '/Volumes/prod'
+Conditions:
+  HasLicenseServer:
+    Fn::Not:
+    - Fn::Equals:
+        - ""
+        - !Ref houdinilicenseserveraddress
+Resources:
+  SSMCombinedVPCCIDR:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /combined_vpcs_cidr
+      Type: String
+      Value: !Ref combinedvpcscidr
+      Description: 'The IP range used for the main VPC.'
+  SSMOrganizationName:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /organization_name
+      Type: String
+      Value: !Ref organizationname
+      Description: 'The organization name to associate with certificates.'
+  SSMValidityPeriodHours:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /validity_period_hours
+      Type: String
+      Value: !Ref validityperiodhours
+      Description: 'The Certificate TTL in hours.'
+  SSMOnsitePublicIp:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_public_ip
+      Type: String
+      Value: !Ref onsitepublicip
+      Description: 'The public IP of your onsite connection used to connect to the cloud infra. Google "what is my ip" for the value. If you do not have a static IP, Terraform may need to update more frequently.'
+      AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  SSMOnsitePrivateSubnetCIDR:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_private_subnet_cidr
+      Type: String
+      Value: !Ref onsiteprivatesubnetcidr
+      Description: 'The private subnet IP range used for your onsite hosts.  Your router will usually use DHCP to place hosts within this range. eg: 192.168.29.0/24'
+      # AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-3]|[0-9]))$"
+  SSMOnsitePrivateVPNIp:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_private_vpn_ip
+      Type: String
+      Value: !Ref onsiteprivatevpnip
+      Description: 'The intended static private IP in your onsite network for the VPN virtual machine.  A VPN gateway requires a static IP reserved in your network.  Static routes configured in your own router must be used to send traffic via this address.'
+      AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  SSMVPNCIDR:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /vpn_cidr
+      Type: String
+      Value: !Ref vpncidr
+      Description: 'The IP range open VPN will use internally for routing.  The default should be fine for most purposes. eg: dev=172.17.232.0/24, blue=172.18.232.0/24, green=172.19.232.0/24, main=172.20.232.0/24'
+  SSMOnsiteUserPublicKey:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_user_public_key
+      Type: String
+      Value: !Ref onsiteuserpublickey
+      Description: 'The public key will be used to provide a certificate for SSH.'
+  GlobalBucketExtension:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /global_bucket_extension
+      Type: String
+      Value: !Ref globalbucketextension
+      Description: 'The suffix used for all S3 cloud storage buckets created by the deployment and for encrypted terraform state.  This must be a globally unique name, like a domain name you own, or derived from an email addess with no special characters. eg1: example.com eg2: myemailatgmaildotcom'
+      AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-.]*[0-9a-zA-Z])*$"
+  GitRepoID:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /git_repo_id
+      Type: String
+      Value: !Ref gitrepoid
+      Description: 'The ID of your git repo fork of firehawk. eg: mygitusername/firehawk'
+      AllowedPattern: "[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+# Deadline UBL Licensing
+  UsageBasedLicenseURL:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /ubl_url
+      Type: String
+      Value: !Ref ublurl
+      Description: 'The URL provided by Thinkbox for your Usage Based Licencing credits.  Rendernodes on AWS get deadline free, but if you require UBL software licences for other packages or for your onsite workstations you will need to purchase credits.'
+      AllowedPattern: "^https.*"
+  UsageBasedLicenseActivationCode:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /ubl_activation_code
+      SecretString: !Ref ublactivationcode
+      Description: 'The 16 digit activation code provided by Thinkbox for your usage based licencing.'
+# For Houdini
+  SSMHoudiniLicenseServerEnabled:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /houdini_license_server_enabled
+      Type: String
+      Value: !Ref houdinilicenseserverenabled
+      Description: 'Is an onsite license server to use over VPN available?'
+  SSMHoudiniLicenseServerAddress:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /houdini_license_server_address
+      Type: String
+      # Value: !Ref houdinilicenseserveraddress
+      Value:
+        Fn::If:
+        - "HasLicenseServer"
+        - !Ref houdinilicenseserveraddress
+        - "0.0.0.0"
+      Description: 'The IP or host name of your Houdini license server (IP Address is recommended to simplify usage across sites with DNS).'
+      # AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+  SSMSESIClientID:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /sesi_client_id
+      Type: String
+      Value: !Ref sesiclientid
+      Description: 'The client ID generated from your Side FX Account to automatically download Houdini.'
+  SSMSESIClientSecretKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /sesi_client_secret_key
+      SecretString: !Ref sesiclientsecretkey
+      Description: 'The client secret key generated from your Side FX Account to automatically download Houdini.'
+  SSMMaxSpotCapacityEngine:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /max_spot_capacity_engine
+      Type: String
+      Value: !Ref maxspotcapacityengine
+      Description: 'The max number of spot instances per deadline group for Houdini Engine.'
+  SSMMaxSpotCapacityMantra:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /max_spot_capacity_mantra
+      Type: String
+      Value: !Ref maxspotcapacitymantra
+      Description: 'The max number of spot instances per deadline group for Houdini Mantra.'
+  SSMOnsiteStorage:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_storage
+      Type: String
+      Value: !Ref onsitestorage
+      Description: 'Is onsite storage to mount over VPN available?'
+  SSMOnsiteNFSExport:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_nfs_export
+      Type: String
+      Value: !Ref onsitenfsexport
+      Description: 'The NFS export path or first arg for /etc/fstab for mounts on render nodes.'
+  SSMOnsiteNFSMountTarget:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /onsite_nfs_mount_target
+      Type: String
+      Value: !Ref onsitenfsmounttarget
+      Description: 'The NFS target path to mount to or second arg for /etc/fstab mounts on render nodes.'
+  SSMCloudS3Gateway:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /cloud_s3_gateway
+      Type: String
+      Value: !Ref clouds3gateway
+      Description: 'Use an S3 File Gateway NFS share for render nodes?'
+  SSMCloudS3GatewayMountTarget:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /cloud_s3_gateway_mount_target
+      Type: String
+      Value: !Ref clouds3gatewaymounttarget
+      Description: 'The FSX target path to mount to or second arg for /etc/fstab mounts on render nodes.'
+  SSMCloudS3GatewaySize:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /cloud_s3_gateway_size
+      Type: String
+      Value: !Ref clouds3gatewaysize
+      Description: 'The size of the File Gateway EBS cache'
+  SSMCloudFSxStorage:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /cloud_fsx_storage
+      Type: String
+      Value: !Ref cloudfsxstorage
+      Description: 'Use FSx for Lustre as an S3 storage gateway for render nodes?'
+  SSMCloudFSxMountTarget:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /cloud_fsx_mount_target
+      Type: String
+      Value: !Ref cloudfsxmounttarget
+      Description: 'The FSX target path to mount to or second arg for /etc/fstab mounts on render nodes.'
+  SSMProdMountTarget:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: 
+        Fn::Join:
+        - ''
+        - - '/firehawk/resourcetier/'
+          - Ref: resourcetier
+          - /prod_mount_target
+      Type: String
+      Value: !Ref prodmounttarget
+      Description: 'The prod mount target may mount a different source depending on the location of the node.'

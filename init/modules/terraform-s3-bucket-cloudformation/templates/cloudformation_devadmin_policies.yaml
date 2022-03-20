@@ -1,0 +1,91 @@
+# For further developement, and the original example that influenced this template - see this example https://github.com/Tiamatt/Mastering-AWS-CloudFormation/blob/main/IAM/Policies-CustomerManagedPolicy.yaml
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Custom IAM policies for admin users.  These permissions are a work in progress and further reduction of the permissions should be applied for production use.
+
+Parameters:
+  adminGroupUsers:
+    Description: 'Comma-delimited list of user names to attach the policy to (optional)'
+    Type: CommaDelimitedList
+    Default: ''
+
+Conditions:
+  hasUsers: # check if any user was specified as an input parameter
+    !Not [!Equals [ !Join ['', !Ref adminGroupUsers], '' ] ]
+
+Resources:
+  CreateGetCostAndUsagePolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: GetCostAndUsageAdminPolicyFirehawk
+      Description: Allow admin access to cost and usage resources.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - ce:*
+          Resource:
+          - "*"
+  CreateResourceGroupsAdminPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: ResourceGroupsAdminPolicyFirehawk
+      Description: Admin access to resource groups.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - resource-groups:*
+          - cloudformation:DescribeStacks
+          - cloudformation:ListStackResources
+          - tag:GetResources
+          - tag:TagResources
+          - tag:UntagResources
+          - tag:getTagKeys
+          - tag:getTagValues
+          - resource-explorer:*
+          Resource: "*"
+
+  CreateDevAdminCustomGroup:
+    Type: AWS::IAM::Group
+    Properties: 
+      GroupName: DevAdminGroupFirehawk
+      ManagedPolicyArns:
+        - !Ref CreateGetCostAndUsagePolicy
+        - !Ref CreateResourceGroupsAdminPolicy
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/IAMFullAccess
+        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+        - arn:aws:iam::aws:policy/AmazonRoute53FullAccess
+        - arn:aws:iam::aws:policy/AmazonRoute53ResolverFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+  CreateStorageAdminCustomGroup:
+    Type: AWS::IAM::Group
+    Properties: 
+      GroupName: StorageAdminGroupFirehawk
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonFSxFullAccess
+        - arn:aws:iam::aws:policy/AmazonFSxConsoleFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  AddUsersToDevAdminGroup:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties: 
+      GroupName: !Ref CreateDevAdminCustomGroup
+      Users: !If [hasUsers, !Ref adminGroupUsers, !Ref "AWS::NoValue"] # Attach this policy to the list of specified users if any
+  AddUsersToStorageAdminGroup:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties: 
+      GroupName: !Ref CreateStorageAdminCustomGroup
+      Users: !If [hasUsers, !Ref adminGroupUsers, !Ref "AWS::NoValue"] # Attach this policy to the list of specified users if any
+
+Outputs:
+  DevAdminGroupName:
+    Description: DevAdmin Group Name
+    Value:  CreateDevAdminCustomGroup
+  StorageAdminGroupName:
+    Description: StorageAdmin Group Name
+    Value: !Ref CreateStorageAdminCustomGroup
