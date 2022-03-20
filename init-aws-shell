@@ -49,8 +49,6 @@ function log_error {
   log "ERROR" "$message"
 }
 
-aws sts get-caller-identity
-
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
@@ -60,26 +58,31 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
-dirname=${SCRIPTDIR##*/}
-targetdir="/aws/mde/tmp"
+function install_packages {
+  aws sts get-caller-identity
 
-echo "pwd: $PWD"
-git pull origin
-./gitpullrecursive --init-all
+  cd $SCRIPTDIR
+  dirname=${SCRIPTDIR##*/}
+  targetdir="/aws/mde/tmp"
 
-app/modules/firehawk/scripts/diskspace_check
+  echo "pwd: $PWD"
+  git pull origin
+  ./gitpullrecursive --init-all
 
-sudo mkdir -p $targetdir
-sudo chown $USER:$USER $targetdir
-sudo chmod +rwX $targetdir
-if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
-  rm -fr "$targetdir/$dirname"
-fi
-cp -fr $SCRIPTDIR $targetdir/.
+  app/modules/firehawk/scripts/diskspace_check
 
-cd $targetdir/$dirname
+  sudo mkdir -p $targetdir
+  sudo chown $USER:$USER $targetdir
+  sudo chmod +rwX $targetdir
+  if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
+    rm -fr "$targetdir/$dirname"
+  fi
+  cp -fr $SCRIPTDIR $targetdir/.
 
-$targetdir/$dirname/install-packages
+  cd $targetdir/$dirname
+
+  $targetdir/$dirname/install-packages
+}
 
 function get_and_set_parm {
   local -r parameter_name="$1"
@@ -191,7 +194,8 @@ function options { # Not all defaults are available as args, however the script 
     shift
   done
   if [[ "$run" == "true" ]]; then
-    #: main funciton
+    #: main function
+    install_packages
 
     parameter_name="git_repo_id"
     parameter_example="mygitusername/firehawk"
