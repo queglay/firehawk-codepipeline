@@ -249,6 +249,46 @@ EOF
     parameter_value_default=""
     get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
 
+    parameter_name="organization_name"
+    parameter_example="My Company"
+    parameter_description="The name of the organization to associate with certificates eg: $parameter_example"
+    parameter_requirements=$(cat << EOF
+
+The name of the organization to associate with certificates.
+eg: My Company
+eg: John Doe
+
+Specify the name of the organization to associate with certificates:
+EOF
+    )
+    #: in bash, backslashes need to be double escaped.
+    regex="[a-zA-Z0-9 ]*"
+    test_url="false" #: This is now inactive
+    parameter_value_default=""
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
+
+    parameter_name="validity_period_hours"
+    parameter_example="8760"
+    parameter_description="The Certificate TTL in hours eg: $parameter_example"
+    parameter_requirements=$(cat << EOF
+
+The validity period for the Vault/Consul SSL Certificate Authority (CA) in hours.
+The Root CA and AMI images will expire after this TTL (Time To Live) period.
+After this duration passes the certificates will become invalid and will need
+to be regenerated.
+eg: 8760
+
+Specify the certificate TTL (Time To Live) in hours:
+EOF
+    )
+    #: in bash, backslashes need to be double escaped.
+    regex="[0-9]*"
+    test_url="false" #: This is now inactive
+    parameter_value_default="8760"
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_url" "$parameter_value_default" "$ask"
+
+
+
     source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
     $targetdir/$dirname/init/init-aws-shell
   fi

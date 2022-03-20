@@ -231,11 +231,12 @@ function export_vars {
   # Retrieve SSM parameters set by cloudformation
   get_parameters=$( aws ssm get-parameters --names \
     "/firehawk/resourcetier/${TF_VAR_resourcetier}/global_bucket_extension" \
+    "/firehawk/resourcetier/${TF_VAR_resourcetier}/organization_name" \
+    "/firehawk/resourcetier/${TF_VAR_resourcetier}/validity_period_hours" \
     "/firehawk/resourcetier/${TF_VAR_resourcetier}/combined_vpcs_cidr" )
     # "/firehawk/resourcetier/${TF_VAR_resourcetier}/vpn_cidr" )
     # "/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_public_ip" \
-    # "/firehawk/resourcetier/${TF_VAR_resourcetier}/organization_name" \
-    # "/firehawk/resourcetier/${TF_VAR_resourcetier}/validity_period_hours" \
+
     # "/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_private_subnet_cidr" \
     # "/firehawk/resourcetier/${TF_VAR_resourcetier}/houdini_license_server_address" \
     # "/firehawk/resourcetier/${TF_VAR_resourcetier}/sesi_client_id" )
@@ -244,10 +245,10 @@ function export_vars {
   if [[ $num_invalid -eq 0 ]]; then
     # export TF_VAR_onsite_public_ip=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_public_ip\")|.Value" --raw-output)
     # error_if_empty "SSM Parameter missing: onsite_public_ip" "$TF_VAR_onsite_public_ip"
-    # export TF_VAR_organization_name=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/organization_name\")|.Value" --raw-output)
-    # error_if_empty "SSM Parameter missing: organization_name" "$TF_VAR_organization_name"
-    # export TF_VAR_validity_period_hours=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/validity_period_hours\")|.Value" --raw-output)
-    # error_if_empty "SSM Parameter missing: validity_period_hours" "$TF_VAR_validity_period_hours"
+    export TF_VAR_organization_name=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/organization_name\")|.Value" --raw-output)
+    error_if_empty "SSM Parameter missing: organization_name" "$TF_VAR_organization_name"
+    export TF_VAR_validity_period_hours=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/validity_period_hours\")|.Value" --raw-output)
+    error_if_empty "SSM Parameter missing: validity_period_hours" "$TF_VAR_validity_period_hours"
     # export TF_VAR_onsite_private_subnet_cidr=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_private_subnet_cidr\")|.Value" --raw-output)
     # error_if_empty "SSM Parameter missing: onsite_private_subnet_cidr" "$TF_VAR_onsite_private_subnet_cidr"
     export TF_VAR_global_bucket_extension=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/global_bucket_extension\")|.Value" --raw-output)
@@ -257,8 +258,8 @@ function export_vars {
     # export TF_VAR_vpn_cidr=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/vpn_cidr\")|.Value" --raw-output)
     # error_if_empty "SSM Parameter missing: vpn_cidr" "$TF_VAR_vpn_cidr"
 
-    # export TF_VAR_ca_common_name="$TF_VAR_organization_name CA Cert"
-    # export TF_VAR_common_name="$TF_VAR_organization_name Cert"
+    export TF_VAR_ca_common_name="$TF_VAR_organization_name CA Cert"
+    export TF_VAR_common_name="$TF_VAR_organization_name Cert"
 
     # export TF_VAR_houdini_license_server_address=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/houdini_license_server_address\")|.Value" --raw-output)
     # export PKR_VAR_houdini_license_server_address="$TF_VAR_houdini_license_server_address"
