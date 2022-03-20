@@ -97,6 +97,6 @@ resource "aws_s3_object" "update_scripts" {
   for_each = fileset("${path.module}/templates/", "*")
   bucket   = aws_s3_bucket.shared_bucket.id
   key      = each.value
-  source   = "${path.module}/scripts/${each.value}"
-  etag     = filemd5("${path.module}/scripts/${each.value}")
+  source   = "${path.module}/templates/${each.value}"
+  etag     = filemd5("${path.module}/templates/${each.value}")
 }
