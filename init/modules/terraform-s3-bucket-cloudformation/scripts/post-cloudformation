@@ -1,3 +1,6 @@
+#!/bin/bash
+
+set -e
 
 bucket_name="$(terragrunt output bucket_name)"
 
@@ -23,7 +26,7 @@ quick_create_url="https://console.aws.amazon.com/cloudformation/home?region=${AW
 
 echo 
 echo "If this is your first time setting up:"
-echo "1. Follow the UBL Instructions"
+echo "1. Follow the UBL Instructions provided in this log.  Without UBL credentials, you can't render."
 echo "2. You must configure more parameters before deployment using the cloudformation template here:"
 echo "${quick_create_url}"
 
