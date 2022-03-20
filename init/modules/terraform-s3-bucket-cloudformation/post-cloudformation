@@ -39,5 +39,6 @@ echo "      If you have already done this, and only want to make changes, do not
 echo "      Instead, go to Cloudformation in the AWS Console and update the template manually."
 echo
 echo "      ${quick_create_url}"
+echo
 
 cd $EXECDIR
