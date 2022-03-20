@@ -154,6 +154,7 @@ function get_and_set_parm {
 
 function options { # Not all defaults are available as args, however the script has been built to easily alter this.
   local ask="false"
+  local run="true"
 
   while [[ $# > 0 ]]; do
     local key="$1"
