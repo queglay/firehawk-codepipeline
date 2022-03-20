@@ -43,9 +43,9 @@ resource "aws_internet_gateway" "gw" {
 }
 
 locals {
-  vpc_id                  = element(concat(aws_vpc.primary.*.id, list("")), 0)
-  aws_vpc_dhcp_options_id = element(concat(aws_vpc_dhcp_options.primary.*.id, list("")), 0)
-  aws_internet_gateway    = element(concat(aws_internet_gateway.gw.*.id, list("")), 0)
+  vpc_id                  = element(concat(aws_vpc.primary.*.id, tolist([""])), 0)
+  aws_vpc_dhcp_options_id = element(concat(aws_vpc_dhcp_options.primary.*.id, tolist([""])), 0)
+  aws_internet_gateway    = element(concat(aws_internet_gateway.gw.*.id, tolist([""])), 0)
   private_subnets         = var.create_vpc ? aws_subnet.private_subnet.*.id : []
   subnet_names = [
     for i in range(length(var.private_subnets)) : format("private%s_%s", i, local.name)
@@ -105,9 +105,9 @@ resource "aws_route_table" "private" {
 
 resource "aws_route" "private_nat_gateway" {
   count                  = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
-  route_table_id         = element(concat(aws_route_table.private.*.id, list("")), 0)
+  route_table_id         = element(concat(aws_route_table.private.*.id, tolist([""])), 0)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(concat(aws_nat_gateway.gw.*.id, list("")), 0)
+  nat_gateway_id         = element(concat(aws_nat_gateway.gw.*.id, tolist([""])), 0)
   timeouts {
     create = "5m"
   }
@@ -121,7 +121,7 @@ resource "aws_route_table" "public" {
 
 resource "aws_route" "public_gateway" {
   count                  = var.create_vpc ? 1 : 0
-  route_table_id         = element(concat(aws_route_table.public.*.id, list("")), 0)
+  route_table_id         = element(concat(aws_route_table.public.*.id, tolist([""])), 0)
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.gw[count.index].id
   timeouts {

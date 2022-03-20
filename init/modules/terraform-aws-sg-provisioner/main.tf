@@ -7,7 +7,7 @@ resource "aws_security_group" "provisioner" {
   name        = var.name
   vpc_id      = data.aws_vpc.thisvpc.id
   description = "Provisioner Security Group"
-  tags        = merge(map("Name", var.name), var.common_tags, local.extra_tags)
+  tags        = merge(tomap({"Name": var.name}), var.common_tags, local.extra_tags)
   egress {
     protocol    = "-1"
     from_port   = 0
