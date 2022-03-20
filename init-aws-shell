@@ -7,6 +7,48 @@ export TF_VAR_resourcetier="$resourcetier"
 
 set -e
 
+
+function print_usage {
+  echo
+  echo "Usage: ./init-aws-shell.sh [OPTIONS]"
+  echo
+  echo "This script can be used to initialise and deploy Firehawk. This script has been tested with AWS Cloudshell."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --configure\t\tThis will enforce asking for parameter values even if they have already been set."
+  echo
+  echo "Example:"
+  echo
+  echo "  ./init-aws-shell.sh"
+  echo
+  echo "Example:"
+  echo
+  echo "  ./init-aws-shell.sh --configure"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
 aws sts get-caller-identity
 
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
@@ -47,31 +89,33 @@ function get_and_set_parm {
   local -r regex="$5"
   local -r test_cidr="$6"
   local -r parameter_value_default="$7"
+  local ask="$8"
 
   # check existance of ssm parameter for parameter name.  Required.
   get_parameters=$( aws ssm get-parameters --names \
     "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" )
   num_invalid=$(echo $get_parameters | jq '.InvalidParameters| length')
-  # changed="false"
-  ask="$DEFAULT_ASK"
 
-  if [[ "$ask" == "false" ]]; then #: determine if ask needs to be set to true here.
-    if [[ ! $num_invalid -eq 0 ]]; then
+  if [[ ! $num_invalid -eq 0 ]]; then #: if the parm doesn't exist
+    if [[ "$ask" == "false" ]]; then #: and ask was false then we are going to have to force an ask.
       ask="true"
       echo ""
       echo "SSM parameter not yet set"
       echo "You must set the SSM parameter for /firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}"
+    fi
+  else
+    #: We always check the value isn't empty.
+    parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
+    if [[ -z "$parameter_value" ]]; then
+      echo ""
+      echo "Parameter value is empty."
+      echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
+      echo "get_parameters: $get_parameters"
+      echo "Should be of format example: $parameter_example"
+      ask="true"
     else
-      parameter_value=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}\")|.Value" --raw-output)
+      #: and show the current value if present.
       echo "...Retrieved ${parameter_name}: $parameter_value"
-      if [[ -z "$parameter_value" ]]; then
-        echo ""
-        echo "Paremeter value is empty."
-        echo "Present SSM Parameter format of value $parameter_name is incorrect or not set.  Current value: $parameter_value"
-        echo "get_parameters: $get_parameters"
-        echo "Should be of format example: $parameter_example"
-        ask="true"
-      fi
     fi
   fi
 
@@ -79,7 +123,7 @@ function get_and_set_parm {
     echo ""
     echo "$parameter_requirements"
     if [[ ! -z "$parameter_value_default" ]]; then
-      echo "Press return to use default: $parameter_value_default"
+      echo "Press return while empty to use default: $parameter_value_default"
     fi
     read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
     if [[ ! -z "$parameter_value_default" ]]; then
@@ -101,64 +145,75 @@ function get_and_set_parm {
 
     if [[ $exit_status -eq 0 ]]; then
       ask="false"
-      # return
     else
       echo "Error Setting parameter."
     fi
-
-    # if [[ ! -z "$regex" ]]; then
-    #   while [[ ! "$parameter_value" =~ "$regex" ]]; do
-    #     echo "Format is incorrect.  eg: $parameter_example"
-    #     read -p "Enter $parameter_name (eg: $parameter_example) : " parameter_value
-    #     echo ""
-    #   done
-    # fi
-    # changed="true"
   done
-
-  # if [[ "$changed" == "true" ]]; then
-  #   echo "...Setting $parameter_name: $parameter_value"
-  #   aws ssm put-parameter \
-  #     --name "/firehawk/resourcetier/${TF_VAR_resourcetier}/${parameter_name}" \
-  #     --description "$parameter_description" \
-  #     --value "$parameter_value" \
-  #     --type "String" \
-  #     --tier Advanced
-  #     --allowed-pattern "$regex"
-  # fi
 }
 
-parameter_name="git_repo_id"
-parameter_example="mygitusername/firehawk"
-parameter_description="The ID of your git repo fork of firehawk. eg: $parameter_example"
-parameter_requirements=$(cat << EOF
+
+function options { # Not all defaults are available as args, however the script has been built to easily alter this.
+  local ask="false"
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+    case "$key" in
+      --configure)
+        ask="true"
+        ;;
+      --help)
+        print_usage
+        run="false"
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        run="false"
+        ;;
+    esac
+    shift
+  done
+  if [[ "$run" == "true" ]]; then
+    #: main funciton
+
+    parameter_name="git_repo_id"
+    parameter_example="mygitusername/firehawk"
+    parameter_description="The ID of your git repo fork of firehawk. eg: $parameter_example"
+    parameter_requirements=$(cat << EOF
 You must have your own fork of firehawkvfx/firehawk in github to continue to trigger automation within your control.
 Ensure you have made your own fork of github.com/firehawkvfx/firehawk and continue.
 
 Specify the git repo id of your fork from firehawkvfx/firehawk (Public repos are tested, private repos are not tested):
 EOF
-)
-regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
-test_cidr="false" #: This is now inactive
-parameter_value_default=""
-get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
+    )
+    regex="[0-9a-zA-Z]+[/][0-9a-zA-Z]+"
+    test_cidr="false" #: This is now inactive
+    parameter_value_default=""
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default" "$ask"
 
-parameter_name="combined_vpcs_cidr"
-parameter_example="10.1.0.0/16"
-parameter_description="The IP range used for all cloud VPC's. eg: $parameter_example"
-parameter_requirements=$(cat << EOF
+    parameter_name="combined_vpcs_cidr"
+    parameter_example="10.1.0.0/16"
+    parameter_description="The IP range used for all cloud VPC's. eg: $parameter_example"
+    parameter_requirements=$(cat << EOF
 The IP range used for the main and rendering VPCs.
 Cloud hosts will reside within this range and it must not intersect with your private network range.
 eg: 10.4.0.0/16 will not interfere with 192.168.1.0/24. eg: dev=10.1.0.0/16, blue=10.2.0.0/16, green=10.3.0.0/16, main=10.4.0.0/16
 
 Specify IP range used for all cloud VPC's:
 EOF
-)
-#: in bash, backslashes need to be double escaped.
-regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
-test_cidr="true" #: This is now inactive
-parameter_value_default="10.1.0.0/16"
-get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default"
+    )
+    #: in bash, backslashes need to be double escaped.
+    regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-2][0-9]|3[0-2]))?$"
+    test_cidr="true" #: This is now inactive
+    parameter_value_default="10.1.0.0/16"
+    get_and_set_parm "$parameter_name" "$parameter_example" "$parameter_description" "$parameter_requirements" "$regex" "$test_cidr" "$parameter_value_default" "$ask"
 
-source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
-# $targetdir/$dirname/init/init-aws-shell
+    source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
+    # $targetdir/$dirname/init/init-aws-shell
+
+  fi
+}
+
+options "$@"
+
+
