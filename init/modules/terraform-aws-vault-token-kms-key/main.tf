@@ -9,7 +9,7 @@ resource "random_pet" "env" {
 }
 locals {
   common_tags      = var.common_tags
-  aws_kms_key_tags = merge(map("Name", "vault-kms-token-${random_pet.env.id}"), local.common_tags)
+  aws_kms_key_tags = merge(tomap({"Name": "vault-kms-token-${random_pet.env.id}"}), local.common_tags)
 }
 
 resource "aws_kms_key" "vault" {
