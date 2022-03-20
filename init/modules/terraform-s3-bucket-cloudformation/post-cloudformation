@@ -2,8 +2,6 @@
 
 set -e
 
-echo "...getring quick-create url"
-
 EXECDIR="$(pwd)"
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -14,7 +12,6 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
-echo "Get bucket name..."
 bucket_name="$(terragrunt output bucket_name)"
 
 # "https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review
@@ -24,14 +21,15 @@ bucket_name="$(terragrunt output bucket_name)"
 #    &param_InstanceType=t2.medium
 #    &param_KeyName=MyKeyPair"
 
-echo "Produce template url..."
 template_url="https://s3.amazonaws.com/${bucket_name}/cloudformation_ssm_parameters_firehawk.yaml"
 
 quick_create_url="https://console.aws.amazon.com/cloudformation/home?region=${AWS_DEFAULT_REGION}#/stacks/create/review?templateURL=${template_url}&stackName=SSMParametersFirehawk"
 
 echo 
+echo "Configuration instructions:"
+echo
 echo "If this is your first time setting up:"
-echo "  1.  Follow the UBL Instructions provided in this log above.  Without the UBL credentials .zip, you can't render."
+echo "  1.  After completing the UBL Instructions provided in this log above, continue.  Without the UBL credentials .zip, you can't render."
 echo "  2.  You must configure more parameters before deployment using the cloudformation template here:"
 echo "      ${quick_create_url}"
 

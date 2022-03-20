@@ -15,9 +15,9 @@ dependencies {
     ]
 }
 
-terraform {
-  after_hook "after_hook_1" {
-    commands = ["apply"]
-    execute  = ["bash", "ubl-instructions"]
-  }
-}
+# terraform {
+#   after_hook "after_hook_1" {
+#     commands = ["apply"]
+#     execute  = ["bash", "ubl-instructions"]
+#   }
+# }
