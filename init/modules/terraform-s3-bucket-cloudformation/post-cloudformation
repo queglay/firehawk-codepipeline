@@ -29,7 +29,8 @@ echo
 echo "Configuration instructions:"
 echo
 echo "If this is your first time setting up:"
-echo "  1.  After completing the UBL Instructions provided in this log above, continue.  Without the UBL credentials .zip, you can't render."
+echo "  1.  After completing the UBL Instructions provided in this log above, continue."
+echo "      Without the UBL credentials .zip in your bucket, you can't render with deadline."
 echo "  2.  You must configure more parameters before deployment using the cloudformation template here:"
 echo "      ${quick_create_url}"
 
