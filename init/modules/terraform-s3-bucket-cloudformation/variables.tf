@@ -3,10 +3,10 @@ variable "share_with_arns" {
   type        = list(string)
   default     = []
 }
-variable "bucketlogs_bucket" {
-  description = "The bucket to store logs in"
-  type        = string
-}
+# variable "bucketlogs_bucket" {
+#   description = "The bucket to store logs in"
+#   type        = string
+# }
 variable "cloudformation_bucket" {
   description = "The S3 Bucket to persist installation and software to"
   type        = string
