@@ -2,8 +2,8 @@
 
 echo "Installing packages for AWS cloud shell"
 
-terraform_version="0.13.7"
-terragrunt_version="0.30.3"
+terraform_version="1.1.7"
+terragrunt_version="0.36.0"
 
 set -e
 # set -x
