@@ -17,6 +17,6 @@ cd $SCRIPTDIR
 terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
 
 $SCRIPTDIR/modules/terraform-s3-bucket-license-forwarder-certs/ubl-instructions
-$SCRIPTDIR/modules/terraform-s3-bucket-cloudformation/scripts/post-cloudformation
+$SCRIPTDIR/modules/terraform-s3-bucket-cloudformation/post-cloudformation
 
 cd $EXECDIR
