@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 4.3.0"
     }
     null = {
@@ -74,7 +74,7 @@ locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
   public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
-  log_group = "firehawk-codebuild-ami"
+  log_group          = "firehawk-codebuild-ami"
 }
 
 resource "aws_security_group" "codebuild_ami" {
@@ -337,9 +337,10 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
   }
 
   environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
+    compute_type = "BUILD_GENERAL1_SMALL"
     # image                       = "public.ecr.aws/n0r4f8d0/test-repo"
-    image                       = "aws/codebuild/standard:1.0"
+    # image                       = "aws/codebuild/standard:1.0"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
