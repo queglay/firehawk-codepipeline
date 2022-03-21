@@ -1,9 +1,10 @@
 #!/bin/bash
 
+set -e
+
 # init will deploy vault only and ensure it is initialised.
 
 EXECDIR="$(pwd)"
-
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
