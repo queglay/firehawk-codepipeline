@@ -338,7 +338,8 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
 
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    # image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    image                       = "aws/codebuild/standard:1.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
