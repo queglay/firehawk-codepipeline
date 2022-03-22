@@ -1,15 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.15.0"
-    }
-    null = {
-      version = "~> 3.0"
-    }
-  }
-  required_version = ">= 0.13"
-}
 locals {
   common_tags = var.common_tags
 }
