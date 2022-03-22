@@ -10,7 +10,7 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
-s3_bucket_name="$(terragrunt output s3_bucket_name)"
+s3_bucket_name="$(terragrunt output --raw s3_bucket_name)"
 
 echo
 echo "UBL Instructions:"
