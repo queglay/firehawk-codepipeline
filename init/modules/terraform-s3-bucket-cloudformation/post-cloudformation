@@ -12,6 +12,8 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
+terragrunt output
+
 bucket_name="$(terragrunt output bucket_name)"
 
 # "https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review
