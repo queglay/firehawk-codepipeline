@@ -25,7 +25,7 @@ $SUDOCMD yum install -y jq openssl python python3.7 python3-pip # for a specific
 mkdir -p $SCRIPTDIR/tmp
 
 if terraform --version 2> /dev/null | grep -nq "Terraform v$terraform_version"; then
-    echo 'terraform already installed'
+    echo 'Terraform already installed'
 else
     wget https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip -P /tmp/ --quiet # Get terraform
     $SUDOCMD unzip /tmp/terraform_${terraform_version}_linux_amd64.zip -d /tmp/
