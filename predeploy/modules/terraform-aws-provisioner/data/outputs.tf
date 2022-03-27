@@ -1,5 +1,6 @@
 output "user_data_base64" {
-  value = null
+  value     = null
+  sensitive = true
 }
 output "vpc_cidr" {
   value = data.aws_vpc.primary.cidr_block

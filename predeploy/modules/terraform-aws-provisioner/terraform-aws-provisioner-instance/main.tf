@@ -53,6 +53,10 @@ resource "null_resource" "start_instance" {
   depends_on = [aws_instance.provisioner]
   count      = (!var.sleep && var.create_vpc) ? 1 : 0
 
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = "aws ec2 start-instances --instance-ids ${local.id}"
@@ -61,6 +65,10 @@ resource "null_resource" "start_instance" {
 
 resource "null_resource" "shutdown_instance" {
   count = var.sleep && var.create_vpc ? 1 : 0
+
+  triggers = {
+    always_run = "${timestamp()}"
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
