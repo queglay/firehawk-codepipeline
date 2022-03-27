@@ -40,7 +40,7 @@ resource "aws_instance" "provisioner" {
   vpc_security_group_ids = [try(data.terraform_remote_state.provisioner_security_group.outputs.security_group_id, null)]
   root_block_device {
     delete_on_termination = true
-    volume_size           = 92
+    volume_size           = local.volume_size
   }
 }
 data "template_file" "user_data_provisioner" {
