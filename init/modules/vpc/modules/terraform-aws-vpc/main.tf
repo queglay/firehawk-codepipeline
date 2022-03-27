@@ -1,8 +1,3 @@
-provider "aws" {
-  # If you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
-  version = "~> 3.15.0"
-}
-
 locals {
   name = var.vpc_name
   extra_tags = {
