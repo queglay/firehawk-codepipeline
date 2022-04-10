@@ -30,6 +30,7 @@ case $input in
 esac
 
 echo "...Deleting images"
-aws ec2 deregister-image --image-id $ami_delete_list
+# aws ec2 deregister-image --image-id $ami_delete_list
+for i in $ami_delete_list; do aws ec2 deregister-image --image-id $i ; done
 echo "...Deleting snapshots"
 for i in $snap_delete_list; do aws ec2 delete-snapshot --snapshot-id $i ; done
