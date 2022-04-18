@@ -11,6 +11,7 @@ ami_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.ImageId)"')
 snap_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.SnapshotId)"')
 # echo "snap_delete_list: $snap_delete_list"
 
+echo "WARNING: This script will delete ALL images in your account older than 7 days"
 read -r -p "Are you sure you want to delete the above images?: [Y/n] " input
 
 echo "Selected: $input"
