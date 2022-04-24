@@ -347,3 +347,45 @@ resource "aws_codebuild_project" "firehawk_destroyapp" {
   # }
 
 }
+
+
+resource "aws_codebuild_project" "firehawk_destroydeployerapp" {
+  name                   = "firehawk-destroydeployerapp"
+  description            = "firehawk_destroydeployerapp_project"
+  build_timeout          = "90"
+  service_role           = aws_iam_role.firehawk_codebuild_createapp_role.arn
+  concurrent_build_limit = 1
+  artifacts {
+    type = "NO_ARTIFACTS" # may need BuildArtifact
+  }
+
+  cache {
+    type     = "S3"
+    location = aws_s3_bucket.codebuild_cache.bucket
+  }
+
+  environment {
+    compute_type = "BUILD_GENERAL1_SMALL"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+  }
+  logs_config {
+    cloudwatch_logs {
+      group_name = local.log_group
+    }
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
+    buildspec       = "buildspec/buildspec-destroydeployerapp.yml"
+    git_clone_depth = 1
+
+    git_submodules_config {
+      fetch_submodules = false
+    }
+  }
+
+  source_version = "main"
+}
