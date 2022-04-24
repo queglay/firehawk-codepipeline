@@ -117,6 +117,22 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+  stage {
+    name = "Destroy-Deployer"
+    action {
+      name             = "DestroyDeployer"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["deploy_destroy_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = "firehawk-destroydeployerapp"
+      }
+    }
+  }
 }
 
 resource "aws_codestarconnections_connection" "my_github_connection" {
