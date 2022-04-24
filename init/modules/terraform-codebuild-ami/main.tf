@@ -22,62 +22,59 @@ data "aws_caller_identity" "current" {}
 #   }
 # }
 
-data "aws_vpc" "primary" {
-  default = false
-  tags    = var.common_tags
-}
-data "aws_internet_gateway" "gw" {
-  tags = var.common_tags
-}
+# data "aws_vpc" "primary" {
+#   default = false
+#   tags    = var.common_tags
+# }
 
-data "aws_subnets" "public" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.primary.id]
-  }
-  tags = {
-    area = "public"
-  }
-}
-data "aws_subnet" "public" {
-  for_each = toset(data.aws_subnets.public.ids)
-  id       = each.value
-}
-data "aws_subnets" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.primary.id]
-  }
-  tags = {
-    area = "private"
-  }
-}
-data "aws_subnet" "private" {
-  for_each = toset(data.aws_subnets.private.ids)
-  id       = each.value
-}
+# data "aws_subnets" "public" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.primary.id]
+#   }
+#   tags = {
+#     area = "public"
+#   }
+# }
+# data "aws_subnet" "public" {
+#   for_each = toset(data.aws_subnets.public.ids)
+#   id       = each.value
+# }
+# data "aws_subnets" "private" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.primary.id]
+#   }
+#   tags = {
+#     area = "private"
+#   }
+# }
+# data "aws_subnet" "private" {
+#   for_each = toset(data.aws_subnets.private.ids)
+#   id       = each.value
+# }
 
 locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
-  public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
+  # public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
   log_group          = "firehawk-codebuild-ami"
 }
 
-resource "aws_security_group" "codebuild_ami" {
-  name        = "codebuild-ami"
-  vpc_id      = data.aws_vpc.primary.id
-  description = "CodeBuild Deployer Security Group"
-  tags        = merge(tomap({ "Name" : "codebuild-ami" }), var.common_tags, local.extra_tags)
+# resource "aws_security_group" "codebuild_ami" {
+#   name        = "codebuild-ami"
+#   vpc_id      = data.aws_vpc.primary.id
+#   description = "CodeBuild Deployer Security Group"
+#   tags        = merge(tomap({ "Name" : "codebuild-ami" }), var.common_tags, local.extra_tags)
 
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "all outgoing traffic"
-  }
-}
+#   egress {
+#     protocol    = "-1"
+#     from_port   = 0
+#     to_port     = 0
+#     cidr_blocks = ["0.0.0.0/0"]
+#     description = "all outgoing traffic"
+#   }
+# }
 
 resource "aws_s3_bucket" "codebuild_cache" {
   bucket = "amibuild-cache.${var.bucket_extension}"
@@ -331,15 +328,15 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
-    environment_variable {
-      name  = "TF_VAR_deployer_sg_id"
-      value = aws_security_group.codebuild_ami.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_deployer_sg_id"
+    #   value = aws_security_group.codebuild_ami.id
+    # }
 
-    environment_variable {
-      name  = "TF_VAR_vpc_id_main_provisioner"
-      value = data.aws_vpc.primary.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_vpc_id_main_provisioner"
+    #   value = data.aws_vpc.primary.id
+    # }
 
   }
   logs_config {
@@ -361,62 +358,13 @@ resource "aws_codebuild_project" "firehawk_amibuild" {
 
   source_version = "main"
 
-  vpc_config {
-    vpc_id = data.aws_vpc.primary.id
+  # vpc_config {
+  #   vpc_id = data.aws_vpc.primary.id
 
-    subnets = toset(data.aws_subnets.private.ids)
+  #   subnets = toset(data.aws_subnets.private.ids)
 
-    security_group_ids = [
-      aws_security_group.codebuild_ami.id,
-    ]
-  }
-
-  # tags = {
-  #   Environment = "Test"
+  #   security_group_ids = [
+  #     aws_security_group.codebuild_ami.id,
+  #   ]
   # }
 }
-
-
-# variable "vpc_id" {}
-# variable "public_subnets" {}
-# variable "private_subnets" {}
-
-# resource "aws_codebuild_project" "project-with-cache" {
-#   name           = "test-project-cache"
-#   description    = "test_codebuild_project_cache"
-#   build_timeout  = "5"
-#   queued_timeout = "5"
-
-#   service_role = aws_iam_role.example.arn
-
-#   artifacts {
-#     type = "NO_ARTIFACTS"
-#   }
-
-#   cache {
-#     type  = "LOCAL"
-#     modes = ["LOCAL_DOCKER_LAYER_CACHE", "LOCAL_SOURCE_CACHE"]
-#   }
-
-#   environment {
-#     compute_type                = "BUILD_GENERAL1_SMALL"
-#     image                       = "aws/codebuild/standard:1.0"
-#     type                        = "LINUX_CONTAINER"
-#     image_pull_credentials_type = "CODEBUILD"
-
-#     environment_variable {
-#       name  = "SOME_KEY1"
-#       value = "SOME_VALUE1"
-#     }
-#   }
-
-#   source {
-#     type            = "GITHUB"
-#     location        = "https://github.com/mitchellh/packer.git"
-#     git_clone_depth = 1
-#   }
-
-#   tags = {
-#     Environment = "Test"
-#   }
-# }
