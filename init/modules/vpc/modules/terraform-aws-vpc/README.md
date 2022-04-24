@@ -1,1 +1,0 @@
-Create an AWS VPC with private and public subnets.

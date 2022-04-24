@@ -8,8 +8,8 @@ locals {
 
 inputs = local.common_vars.inputs
 
-dependencies {
-  paths = [
-    "../vpc"
-    ]
-}
+# dependencies {
+#   paths = [
+#     "../vpc"
+#     ]
+# }
