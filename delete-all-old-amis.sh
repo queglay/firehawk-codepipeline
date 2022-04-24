@@ -1,6 +1,7 @@
 #!/bin/bash
-latest_date=$(date  --date="7 days ago" +"%Y-%m-%d")
-#---The following is to remove AMIs older than 3 days---#
+days="7"
+latest_date=$(date  --date="$days days ago" +"%Y-%m-%d")
+#---The following is to remove AMIs older than $days---#
 aws ec2 describe-images --owners self --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
 ami_delete=$(cat /tmp/ami-delete.txt)
 echo "ami_delete: $ami_delete"
@@ -11,7 +12,7 @@ ami_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.ImageId)"')
 snap_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.SnapshotId)"')
 # echo "snap_delete_list: $snap_delete_list"
 
-echo "WARNING: This script will delete ALL images in your account older than 7 days"
+echo "WARNING: This script will delete ALL images in your account older than $days days"
 read -r -p "Are you sure you want to delete the above images?: [Y/n] " input
 
 echo "Selected: $input"
