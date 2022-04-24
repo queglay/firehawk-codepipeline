@@ -8,7 +8,7 @@ terragrunt_version="0.36.0"
 set -e
 # set -x
 
-aws sts get-caller-identity
+# aws sts get-caller-identity
 
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -21,7 +21,8 @@ cd $SCRIPTDIR
 
 SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 
-$SUDOCMD yum install -y jq openssl python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
+$SUDOCMD yum install -y jq
+# $SUDOCMD yum install -y openssl python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 mkdir -p $SCRIPTDIR/tmp
 
 if terraform --version 2> /dev/null | grep -nq "Terraform v$terraform_version"; then
