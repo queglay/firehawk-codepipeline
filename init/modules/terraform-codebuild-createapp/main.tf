@@ -44,20 +44,20 @@ locals {
   log_group          = "firehawk-codebuild-createapp"
 }
 
-resource "aws_security_group" "codebuild_createapp" {
-  name        = "codebuild-createapp"
-  vpc_id      = data.aws_vpc.primary.id
-  description = "CodeBuild Deployer Security Group"
-  tags        = merge(tomap({ "Name" : "codebuild-createapp" }), var.common_tags, local.extra_tags)
+# resource "aws_security_group" "codebuild_createapp" {
+#   name        = "codebuild-createapp"
+#   vpc_id      = data.aws_vpc.primary.id
+#   description = "CodeBuild Deployer Security Group"
+#   tags        = merge(tomap({ "Name" : "codebuild-createapp" }), var.common_tags, local.extra_tags)
 
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "all outgoing traffic"
-  }
-}
+#   egress {
+#     protocol    = "-1"
+#     from_port   = 0
+#     to_port     = 0
+#     cidr_blocks = ["0.0.0.0/0"]
+#     description = "all outgoing traffic"
+#   }
+# }
 
 variable "bucket_extension" {
   type        = string
