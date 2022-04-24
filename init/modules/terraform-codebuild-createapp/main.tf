@@ -6,47 +6,41 @@ data "aws_caller_identity" "current" {}
 
 # # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
 
-data "aws_vpc" "primary" {
-  default = false
-  tags    = var.common_tags
-}
-data "aws_internet_gateway" "gw" {
-  tags = var.common_tags
-}
-
-data "aws_subnets" "public" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.primary.id]
-  }
-  tags = {
-    area = "public"
-  }
-}
-
-data "aws_subnet" "public" {
-  for_each = toset(data.aws_subnets.public.ids)
-  id       = each.value
-}
-
-data "aws_subnets" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.primary.id]
-  }
-  tags = {
-    area = "private"
-  }
-}
-data "aws_subnet" "private" {
-  for_each = toset(data.aws_subnets.private.ids)
-  id       = each.value
-}
+# data "aws_vpc" "primary" {
+#   default = false
+#   tags    = var.common_tags
+# }
+# data "aws_subnets" "public" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.primary.id]
+#   }
+#   tags = {
+#     area = "public"
+#   }
+# }
+# data "aws_subnet" "public" {
+#   for_each = toset(data.aws_subnets.public.ids)
+#   id       = each.value
+# }
+# data "aws_subnets" "private" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.primary.id]
+#   }
+#   tags = {
+#     area = "private"
+#   }
+# }
+# data "aws_subnet" "private" {
+#   for_each = toset(data.aws_subnets.private.ids)
+#   id       = each.value
+# }
 
 locals {
   common_tags        = var.common_tags
   extra_tags         = { "role" : "codebuild" }
-  public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
+  # public_subnet_arns = "[ ${join(",", [for s in data.aws_subnet.public : format("%q", s.arn)])} ]"
   log_group          = "firehawk-codebuild-createapp"
 }
 
@@ -248,15 +242,15 @@ resource "aws_codebuild_project" "firehawk_createapp" {
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
-    environment_variable {
-      name  = "TF_VAR_deployer_sg_id"
-      value = aws_security_group.codebuild_createapp.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_deployer_sg_id"
+    #   value = aws_security_group.codebuild_createapp.id
+    # }
 
-    environment_variable {
-      name  = "TF_VAR_vpc_id_main_provisioner"
-      value = data.aws_vpc.primary.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_vpc_id_main_provisioner"
+    #   value = data.aws_vpc.primary.id
+    # }
 
   }
   logs_config {
@@ -278,15 +272,15 @@ resource "aws_codebuild_project" "firehawk_createapp" {
 
   source_version = "main"
 
-  vpc_config {
-    vpc_id = data.aws_vpc.primary.id
+  # vpc_config {
+  #   vpc_id = data.aws_vpc.primary.id
 
-    subnets = toset(data.aws_subnets.private.ids)
+  #   subnets = toset(data.aws_subnets.private.ids)
 
-    security_group_ids = [
-      aws_security_group.codebuild_createapp.id,
-    ]
-  }
+  #   security_group_ids = [
+  #     aws_security_group.codebuild_createapp.id,
+  #   ]
+  # }
 
 }
 
@@ -312,15 +306,15 @@ resource "aws_codebuild_project" "firehawk_destroyapp" {
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
-    environment_variable {
-      name  = "TF_VAR_deployer_sg_id"
-      value = aws_security_group.codebuild_createapp.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_deployer_sg_id"
+    #   value = aws_security_group.codebuild_createapp.id
+    # }
 
-    environment_variable {
-      name  = "TF_VAR_vpc_id_main_provisioner"
-      value = data.aws_vpc.primary.id
-    }
+    # environment_variable {
+    #   name  = "TF_VAR_vpc_id_main_provisioner"
+    #   value = data.aws_vpc.primary.id
+    # }
 
   }
   logs_config {
@@ -342,14 +336,14 @@ resource "aws_codebuild_project" "firehawk_destroyapp" {
 
   source_version = "main"
 
-  vpc_config {
-    vpc_id = data.aws_vpc.primary.id
+  # vpc_config {
+  #   vpc_id = data.aws_vpc.primary.id
 
-    subnets = toset(data.aws_subnets.private.ids)
+  #   subnets = toset(data.aws_subnets.private.ids)
 
-    security_group_ids = [
-      aws_security_group.codebuild_createapp.id,
-    ]
-  }
+  #   security_group_ids = [
+  #     aws_security_group.codebuild_createapp.id,
+  #   ]
+  # }
 
 }
