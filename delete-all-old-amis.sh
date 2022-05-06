@@ -99,6 +99,10 @@ function options { # Not all defaults are available as args, however the script 
         days_old="$2"
         shift
         ;;
+      --help)
+        print_usage
+        run="false"
+        ;;
       *)
         log_error "Unrecognized argument: $key"
         print_usage
