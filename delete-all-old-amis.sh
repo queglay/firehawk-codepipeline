@@ -69,3 +69,5 @@ function options { # Not all defaults are available as args, however the script 
     main "$days_old"
   fi
 }
+
+options "$@"
