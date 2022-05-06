@@ -42,8 +42,8 @@ function log_error {
 }
 
 function main {
-    local -r days="$1"
-    latest_date=$(date  --date="$days days ago" +"%Y-%m-%d")
+    local -r days_old="$1"
+    latest_date=$(date  --date="$days_old days ago" +"%Y-%m-%d")
     #---The following is to remove AMIs older than $days---#
     aws ec2 describe-images --owners self --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
     ami_delete=$(cat /tmp/ami-delete.txt)
@@ -55,7 +55,7 @@ function main {
     snap_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.SnapshotId)"')
     # echo "snap_delete_list: $snap_delete_list"
 
-    echo "WARNING: This script will delete ALL images in your account older than $days days"
+    echo "WARNING: This script will delete ALL images in your account older than $days_old days"
     read -r -p "Are you sure you want to delete the above images?: [Y/n] " input
 
     echo "Selected: $input"
