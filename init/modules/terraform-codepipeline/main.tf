@@ -74,7 +74,7 @@ resource "aws_codepipeline" "codepipeline" {
   stage {
     name = "ApproveDestroy"
     action {
-      name     = "Authorize Destroy"
+      name     = "Approval"
       category = "Approval"
       owner    = "AWS"
       provider = "Manual"
