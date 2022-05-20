@@ -72,9 +72,9 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "ApproveDestroy"
+    name = "Approve-Destroy"
     action {
-      name     = "Approval"
+      name     = "ApproveDestroy"
       category = "Approval"
       owner    = "AWS"
       provider = "Manual"
@@ -89,7 +89,7 @@ resource "aws_codepipeline" "codepipeline" {
   stage {
     name = "Build-Destroy"
     action {
-      name             = "Build"
+      name             = "BuildDestroy"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
