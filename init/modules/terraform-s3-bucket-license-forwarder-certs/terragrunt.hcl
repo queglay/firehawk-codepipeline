@@ -10,7 +10,6 @@ inputs = local.common_vars.inputs
 
 dependencies {
   paths = [
-    "../terraform-aws-iam-profile-deadline-db",
     "../terraform-s3-bucket-logs"
     ]
 }
