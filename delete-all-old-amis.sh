@@ -58,6 +58,12 @@ function main {
     else
       latest_date=$(date  --date="$days_old days ago" +"%Y-%m-%d")
       aws ec2 describe-images --owners self --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
+      # # example to exclude based on data
+      # aws ec2 describe-images --owners self --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" | jq 'del(.[] | select(.commit_hash_short == "MYCOMMITHASH"))'
+      # aws ec2 describe-images --owners self --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" | jq 'del(.[] | ["MYCOMMITHASH","MYCOMMITHASH2"] as $in | select(.commit_hash_short == $in ))'
+      # aws ec2 describe-images --owners self --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" | jq -c '.commit_hash_short - ["MYCOMMITHASH","71555a9"]'
+      # -c '. - ["MYCOMMITHASH","71555a9"]'
+      # jq 'del(.[] | select(.commit_hash_short == "MYCOMMITHASH"))'
       ami_delete=$(cat /tmp/ami-delete.txt)
       echo "ami_delete: $ami_delete"
       echo "WARNING: This script will delete ALL images in your account older than $days_old days"
