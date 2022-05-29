@@ -8,7 +8,8 @@ function print_usage {
   echo
   echo "Options:"
   echo
-  echo -e "  --days-old\t\tThis set the minimmum age in days to delete AMI's."
+  echo -e "  --days-old\t\t\tThis sets the minimum age in days to delete AMI's."
+  echo -e "  --commit-hash-short-list\tThe AMI's with matching tags for commit_hash_short that are in this list."
   echo
   echo "Example:"
   echo
@@ -17,6 +18,10 @@ function print_usage {
   echo "Example:"
   echo
   echo "  ./delete-all-old-amis.sh --days-old 14"
+  echo
+  echo "Example:"
+  echo
+  echo "  ./delete-all-old-amis.sh --commit-hash-short-list 5d6447e,a0236d9,8f8bedc"  
 }
 
 function log {
