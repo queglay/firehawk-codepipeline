@@ -46,7 +46,7 @@ function main {
     local -r commit_hash_short_list="$2"
 
     if [[ ! -z "$commit_hash_short_list" ]]; then
-      aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
+      aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
       ami_delete=$(cat /tmp/ami-delete.txt)
       echo "ami_delete: $ami_delete"
       echo "WARNING: This script will delete ALL images in your account with tags matching commit_hash_short: $commit_hash_short_list"
