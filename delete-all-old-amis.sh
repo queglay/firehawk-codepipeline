@@ -45,14 +45,20 @@ function main {
     local -r days_old="$1"
     local -r commit_hash_short_list="$2"
 
+aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:Tags}"
+
+aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:Tags[?Key==`Name`]}"
+
+aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}"
+
     if [[ ! -z "$commit_hash_short_list" ]]; then
-      aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
+      aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
       ami_delete=$(cat /tmp/ami-delete.txt)
       echo "ami_delete: $ami_delete"
       echo "WARNING: This script will delete ALL images in your account with tags matching commit_hash_short: $commit_hash_short_list"
     else
       latest_date=$(date  --date="$days_old days ago" +"%Y-%m-%d")
-      aws ec2 describe-images --owners self --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
+      aws ec2 describe-images --owners self --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
       ami_delete=$(cat /tmp/ami-delete.txt)
       echo "ami_delete: $ami_delete"
       echo "WARNING: This script will delete ALL images in your account older than $days_old days"
