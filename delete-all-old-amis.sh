@@ -45,12 +45,6 @@ function main {
     local -r days_old="$1"
     local -r commit_hash_short_list="$2"
 
-aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:Tags}"
-
-aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:Tags[?Key==`Name`]}"
-
-aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[5d6447e,c001fab]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}"
-
     if [[ ! -z "$commit_hash_short_list" ]]; then
       aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --filters "Name=tag:packer_template,Values=[firehawk-ami,firehawk-base-ami]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId,commit_hash_short:[Tags[?Key=='commit_hash_short']][0][0].Value}" > /tmp/ami-delete.txt
       ami_delete=$(cat /tmp/ami-delete.txt)
