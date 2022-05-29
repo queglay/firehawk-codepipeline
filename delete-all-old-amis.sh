@@ -43,19 +43,26 @@ function log_error {
 
 function main {
     local -r days_old="$1"
-    latest_date=$(date  --date="$days_old days ago" +"%Y-%m-%d")
-    #---The following is to remove AMIs older than $days---#
-    aws ec2 describe-images --owners self --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
-    ami_delete=$(cat /tmp/ami-delete.txt)
-    echo "ami_delete: $ami_delete"
-    # aws ec2 describe-images --filters "Name=name,Values=`cat /tmp/ami-delete.txt`" | grep -i imageid | awk '{ print  $2 }' > /tmp/image-id.txt
+    local -r commit_hash_short_list="$2"
+
+    if [[ ! -z "$commit_hash_short_list" ]]; then
+      aws ec2 describe-images --owners self --filters "Name=tag:commit_hash_short,Values=[$commit_hash_short_list]" --query "Images[*].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
+      ami_delete=$(cat /tmp/ami-delete.txt)
+      echo "ami_delete: $ami_delete"
+      echo "WARNING: This script will delete ALL images in your account with tags matching commit_hash_short: $commit_hash_short_list"
+    else
+      latest_date=$(date  --date="$days_old days ago" +"%Y-%m-%d")
+      aws ec2 describe-images --owners self --query "Images[?CreationDate<\`${latest_date}\`].{ImageId:ImageId,date:CreationDate,Name:Name,SnapshotId:BlockDeviceMappings[0].Ebs.SnapshotId}" > /tmp/ami-delete.txt
+      ami_delete=$(cat /tmp/ami-delete.txt)
+      echo "ami_delete: $ami_delete"
+      echo "WARNING: This script will delete ALL images in your account older than $days_old days"
+    fi
 
     ami_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.ImageId)"')
     # echo "ami_delete_list: $ami_delete_list"
     snap_delete_list=$(echo $ami_delete | jq -r '.[] | "\(.SnapshotId)"')
     # echo "snap_delete_list: $snap_delete_list"
 
-    echo "WARNING: This script will delete ALL images in your account older than $days_old days"
     read -r -p "Are you sure you want to delete the above images?: [Y/n] " input
 
     echo "Selected: $input"
@@ -91,12 +98,18 @@ function main {
 function options { # Not all defaults are available as args, however the script has been built to easily alter this.
   local days_old="7"
   local run="true"
+  local commit_hash_short_list=""
 
   while [[ $# > 0 ]]; do
     local key="$1"
     case "$key" in
       --days-old)
         days_old="$2"
+        shift
+        ;;
+      --commit-hash-short-list)
+        commit_hash_short_list="$2"
+        days_old="0"
         shift
         ;;
       --help)
@@ -112,7 +125,7 @@ function options { # Not all defaults are available as args, however the script 
     shift
   done
   if [[ "$run" == "true" ]]; then
-    main "$days_old"
+    main "$days_old" "$commit_hash_short_list"
   fi
 }
 
