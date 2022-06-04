@@ -25,13 +25,13 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 }
 # Policy Allowing Read and write access to S3
 module "iam_policies_s3_read_write" {
-  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-read-write?ref=v0.0.27"
+  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-read-write"
   name        = "S3ReadWrite_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 # Policy to query the identity of the current role.  Required for Vault.
 module "iam_policies_get_caller_identity" {
-  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-get-caller-identity?ref=v0.0.3"
+  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-get-caller-identity"
   name        = "STSGetCallerIdentity_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
@@ -41,12 +41,12 @@ module "consul_iam_policies_for_client" {
   iam_role_id = aws_iam_role.instance_role.id
 }
 module "iam_policies_ssm_manage_channels" {
-  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-ssm-manage-channels?ref=v0.0.26"
+  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-ssm-manage-channels"
   name        = "SSMManageChannels_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 module "iam_policies_provisioner_firehawk" {
-  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-provisioner-firehawk?ref=v0.0.28"
+  source      = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-provisioner-firehawk"
   name        = "ProvisionerFirehawk_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
