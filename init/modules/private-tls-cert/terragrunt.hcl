@@ -30,8 +30,8 @@ terraform { # After SSL certs have been generated, isntall them to the current i
     commands = ["apply"]
     execute  = ["bash", "validate-cert"]
   }
-  after_hook "after_hook_2" {
-    commands = ["apply"]
-    execute  = ["bash", "instructions"]
-  }
+  # after_hook "after_hook_2" {
+  #   commands = ["apply"]
+  #   execute  = ["bash", "instructions"]
+  # }
 }
