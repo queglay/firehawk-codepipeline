@@ -66,7 +66,7 @@ resource "aws_codepipeline" "codepipeline" {
       input_artifacts = ["build_output"]
       version         = "1"
       configuration = {
-        ApplicationName     = "firehawk-codedeploy-app"
+        ApplicationName     = "firehawk-codedeploy-infra-app"
         DeploymentGroupName = "firehawk-deployment-group"
       }
     }
@@ -112,7 +112,7 @@ resource "aws_codepipeline" "codepipeline" {
       input_artifacts = ["build_destroy_output"]
       version         = "1"
       configuration = {
-        ApplicationName     = "firehawk-codedeploy-app"
+        ApplicationName     = "firehawk-codedeploy-infra-app"
         DeploymentGroupName = "firehawk-deployment-group"
       }
     }
