@@ -33,7 +33,8 @@ cp -fr $SCRIPTDIR $targetdir/.
 cd $targetdir/$dirname
 
 ./install-packages
-./app/scripts/destroy_deployment
+# ./app/scripts/destroy_deployment
+./app/modules/firehawk/scripts/destroy_deployment
 
 echo "To observe logs for this deployment, connect to the ec2 instance using session manager and run:"
 echo "tail -f /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log"
