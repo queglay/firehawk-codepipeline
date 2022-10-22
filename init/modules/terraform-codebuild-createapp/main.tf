@@ -284,6 +284,48 @@ resource "aws_codebuild_project" "firehawk_createapp" {
 
 }
 
+resource "aws_codebuild_project" "firehawk_testapp" { # app to test deployment
+  name                   = "firehawk-testapp"
+  description            = "firehawk_testapp_project"
+  build_timeout          = "90"
+  service_role           = aws_iam_role.firehawk_codebuild_createapp_role.arn
+  concurrent_build_limit = 1
+  artifacts {
+    type = "NO_ARTIFACTS" # may need BuildArtifact
+  }
+
+  cache {
+    type     = "S3"
+    location = aws_s3_bucket.codebuild_cache.bucket
+  }
+
+  environment {
+    compute_type = "BUILD_GENERAL1_SMALL"
+    # image                       = "public.ecr.aws/n0r4f8d0/test-repo"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+  }
+  logs_config {
+    cloudwatch_logs {
+      group_name = local.log_group
+    }
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/firehawkvfx/firehawk-pdg-test.git"
+    buildspec       = "appspec.yml" # TODO this is incorrect.
+    git_clone_depth = 1
+
+    git_submodules_config {
+      fetch_submodules = false
+    }
+  }
+
+  source_version = "main"
+}
+
 resource "aws_codebuild_project" "firehawk_destroyapp" {
   name                   = "firehawk-destroyapp"
   description            = "firehawk_destroyapp_project"

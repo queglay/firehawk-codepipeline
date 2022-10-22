@@ -72,6 +72,21 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
+    name = "Test"
+    action {
+      name            = "Test"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "CodeDeploy"
+      input_artifacts = ["build_output"]
+      version         = "1"
+      configuration = {
+        ApplicationName     = "firehawk-codedeploy-test-app"
+        DeploymentGroupName = "firehawk-test-group"
+      }
+    }
+  }
+  stage {
     name = "Approve-Destroy"
     action {
       name     = "ApproveDestroy"
