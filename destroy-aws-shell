@@ -2,10 +2,47 @@
 
 # defaults
 resourcetier="dev"
+export TF_VAR_resourcetier="$resourcetier"
 
 set -e
 
-aws sts get-caller-identity
+
+function print_usage {
+  echo
+  echo "Usage: ./init-aws-shell.sh [OPTIONS]"
+  echo
+  echo "This script can be used to initialise and deploy Firehawk. This script has been tested with AWS Cloudshell."
+  echo
+  echo "Example:"
+  echo
+  echo "  ./init-aws-shell.sh"
+  echo
+  echo "Example:"
+  echo
+  echo "  ./init-aws-shell.sh --configure"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
 
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -16,25 +53,58 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
-dirname=${SCRIPTDIR##*/}
-targetdir="/aws/mde/tmp"
+function install_packages {
+  aws sts get-caller-identity
 
-echo "pwd: $PWD"
-git pull origin
-./gitpullrecursive --init-all
+  cd $SCRIPTDIR
+  dirname=${SCRIPTDIR##*/}
+  targetdir="/aws/mde/tmp"
 
-sudo mkdir -p $targetdir
-sudo chown $USER:$USER $targetdir
-sudo chmod +rwX $targetdir
-if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
-  rm -fr "$targetdir/$dirname"
-fi
-cp -fr $SCRIPTDIR $targetdir/.
-cd $targetdir/$dirname
+  echo "pwd: $PWD"
+  git pull origin
+  ./gitpullrecursive --init-all
 
-./install-packages
-# ./app/scripts/destroy_deployment
-./app/modules/firehawk/scripts/destroy_deployment
+  app/modules/firehawk/scripts/diskspace_check
 
-echo "To observe logs for this deployment, connect to the ec2 instance using session manager and run:"
-echo "tail -f /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log"
+  sudo mkdir -p $targetdir
+  sudo chown $USER:$USER $targetdir
+  sudo chmod +rwX $targetdir
+  if [[ -d "$targetdir/$dirname" ]]; then # clean dir if exist
+    rm -fr "$targetdir/$dirname"
+  fi
+  cp -fr $SCRIPTDIR $targetdir/.
+
+  cd $targetdir/$dirname
+
+  $targetdir/$dirname/install-packages
+}
+
+
+function options { # Not all defaults are available as args, however the script has been built to easily alter this.
+  local run="true"
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+    case "$key" in
+      --help)
+        print_usage
+        run="false"
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        run="false"
+        ;;
+    esac
+    shift
+  done
+  if [[ "$run" == "true" ]]; then
+    #: main function
+    install_packages
+
+    source $targetdir/$dirname/update_vars.sh --resourcetier $resourcetier
+    $targetdir/$dirname/init/destroy-aws-shell
+  fi
+}
+
+options "$@"
