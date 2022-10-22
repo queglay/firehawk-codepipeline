@@ -72,23 +72,41 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+  # stage {
+  #   name = "SourceTest"
+
+  #   action {
+  #     name             = "SourceTest"
+  #     category         = "Source"
+  #     owner            = "AWS"
+  #     provider         = "CodeStarSourceConnection"
+  #     version          = "1"
+  #     output_artifacts = ["source_test_app_output"]
+
+  #     configuration = {
+  #       ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
+  #       FullRepositoryId     = "firehawkvfx/firehawk-pdg-test"
+  #       BranchName           = "main"
+  #       OutputArtifactFormat = "CODEBUILD_CLONE_REF"
+  #       # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
+  #     }
+  #   }
+  # }
   stage {
-    name = "SourceTest"
+    name = "BuildTest"
 
     action {
-      name             = "SourceTest"
-      category         = "Source"
+      name             = "BuildTest"
+      category         = "Build"
       owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
-      version          = "1"
+      provider         = "CodeBuild"
+      # The app itself defines it's source when not running in codepipeline, but in this case code pipeline defines the source via input_artifacts
+      input_artifacts  = ["source_infra_app_output"]
       output_artifacts = ["source_test_app_output"]
+      version          = "1"
 
       configuration = {
-        ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
-        FullRepositoryId     = "firehawkvfx/firehawk-pdg-test"
-        BranchName           = "main"
-        OutputArtifactFormat = "CODEBUILD_CLONE_REF"
-        # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
+        ProjectName = "firehawk-testapp"
       }
     }
   }
