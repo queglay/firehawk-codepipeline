@@ -64,12 +64,19 @@ variable "bucket_extension" {
   description = "The suffix used to generate the bucket name for the codebuild cache."
 }
 
-resource "aws_s3_bucket" "codebuild_cache" {
-  bucket = "createapp-cache.${var.bucket_extension}"
+resource "aws_s3_bucket" "codebuild_cache_deploy" {
+  bucket = "createapp-cache-deploy.${var.bucket_extension}"
+}
+resource "aws_s3_bucket" "codebuild_cache_test" {
+  bucket = "createapp-cache-test.${var.bucket_extension}"
 }
 
 resource "aws_s3_bucket_acl" "acl_config" {
-  bucket = aws_s3_bucket.codebuild_cache.id
+  bucket = aws_s3_bucket.codebuild_cache_deploy.id
+  acl    = "private"
+}
+resource "aws_s3_bucket_acl" "acl_config" {
+  bucket = aws_s3_bucket.codebuild_cache_test.id
   acl    = "private"
 }
 
@@ -232,7 +239,7 @@ resource "aws_codebuild_project" "firehawk_createapp" {
 
   cache {
     type     = "S3"
-    location = aws_s3_bucket.codebuild_cache.bucket
+    location = aws_s3_bucket.codebuild_cache_deploy.bucket
   }
 
   environment {
@@ -296,7 +303,7 @@ resource "aws_codebuild_project" "firehawk_testapp" { # app to test deployment
 
   cache {
     type     = "S3"
-    location = aws_s3_bucket.codebuild_cache.bucket
+    location = aws_s3_bucket.codebuild_cache_test.bucket
   }
 
   environment {
@@ -315,7 +322,7 @@ resource "aws_codebuild_project" "firehawk_testapp" { # app to test deployment
   source {
     type            = "GITHUB"
     location        = "https://github.com/firehawkvfx/firehawk-pdg-test.git"
-    buildspec       = "appspec.yml" # TODO this is incorrect.
+    buildspec       = "buildspec/buildspec-test.yml" # TODO this is incorrect.
     git_clone_depth = 1
 
     git_submodules_config {
@@ -338,7 +345,7 @@ resource "aws_codebuild_project" "firehawk_destroyapp" {
 
   cache {
     type     = "S3"
-    location = aws_s3_bucket.codebuild_cache.bucket
+    location = aws_s3_bucket.codebuild_cache_deploy.bucket
   }
 
   environment {
@@ -403,7 +410,7 @@ resource "aws_codebuild_project" "firehawk_destroydeployerapp" {
 
   cache {
     type     = "S3"
-    location = aws_s3_bucket.codebuild_cache.bucket
+    location = aws_s3_bucket.codebuild_cache_deploy.bucket
   }
 
   environment {

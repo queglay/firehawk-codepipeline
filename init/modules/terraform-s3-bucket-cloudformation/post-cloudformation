@@ -33,12 +33,16 @@ echo
 echo "  1.  After completing the UBL Instructions provided in this log above, continue."
 echo "      Without the UBL credentials .zip in your bucket, you can't render with deadline."
 echo
-echo "  2.  You must configure more parameters before deployment using the cloudformation template"
+echo "  2.  Goto the codepipeline page and edit tf-firehawk-deploy-pipeline."
+echo "      Edit the stage 'source' and you should see an option to complete your github credentials."
+echo
+echo "  3.  You must configure more parameters before deployment using the cloudformation template"
 echo "      URL below."
 echo "      If you have already done this, and only want to make changes, do not use this link."
 echo "      Instead, go to Cloudformation in the AWS Console and update the template manually."
 echo
 echo "      ${quick_create_url}"
 echo
+echo "  4.  You are now ready to start the codepipeline in the console and deploy."
 
 cd $EXECDIR
