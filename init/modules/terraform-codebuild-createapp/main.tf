@@ -71,11 +71,11 @@ resource "aws_s3_bucket" "codebuild_cache_test" {
   bucket = "createapp-cache-test.${var.bucket_extension}"
 }
 
-resource "aws_s3_bucket_acl" "acl_config" {
+resource "aws_s3_bucket_acl" "acl_config_deploy" {
   bucket = aws_s3_bucket.codebuild_cache_deploy.id
   acl    = "private"
 }
-resource "aws_s3_bucket_acl" "acl_config" {
+resource "aws_s3_bucket_acl" "acl_config_test" {
   bucket = aws_s3_bucket.codebuild_cache_test.id
   acl    = "private"
 }
