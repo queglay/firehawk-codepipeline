@@ -228,6 +228,8 @@ data "aws_ssm_parameter" "git_repo_id" {
 
 
 resource "aws_codebuild_project" "firehawk_createapp" {
+  # This clones the firehawk repo and configures files with image ID's in the repo dir
+  # The result dir is used for the app to run with codedeploy.
   name                   = "firehawk-createapp"
   description            = "firehawk_createapp_project"
   build_timeout          = "90"
@@ -253,12 +255,6 @@ resource "aws_codebuild_project" "firehawk_createapp" {
     #   name  = "TF_VAR_deployer_sg_id"
     #   value = aws_security_group.codebuild_createapp.id
     # }
-
-    # environment_variable {
-    #   name  = "TF_VAR_vpc_id_main_provisioner"
-    #   value = data.aws_vpc.primary.id
-    # }
-
   }
   logs_config {
     cloudwatch_logs {
@@ -278,16 +274,6 @@ resource "aws_codebuild_project" "firehawk_createapp" {
   }
 
   source_version = "main"
-
-  # vpc_config {
-  #   vpc_id = data.aws_vpc.primary.id
-
-  #   subnets = toset(data.aws_subnets.private.ids)
-
-  #   security_group_ids = [
-  #     aws_security_group.codebuild_createapp.id,
-  #   ]
-  # }
 
 }
 

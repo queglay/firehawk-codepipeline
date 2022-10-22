@@ -18,15 +18,15 @@ resource "aws_codepipeline" "codepipeline" {
   }
 
   stage {
-    name = "Source"
+    name = "SourceInfra"
 
     action {
-      name             = "Source"
+      name             = "SourceInfra"
       category         = "Source"
       owner            = "AWS"
       provider         = "CodeStarSourceConnection"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["source_infra_app_output"]
 
       configuration = {
         ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
@@ -39,15 +39,16 @@ resource "aws_codepipeline" "codepipeline" {
   }
 
   stage {
-    name = "Build"
+    name = "BuildInfra"
 
     action {
-      name             = "Build"
+      name             = "BuildInfra"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      # The app itself defines it's source when not running in codepipeline, but in this case code pipeline defines the source via input_artifacts
+      input_artifacts  = ["source_infra_app_output"]
+      output_artifacts = ["build_infra_app_output"]
       version          = "1"
 
       configuration = {
@@ -57,13 +58,13 @@ resource "aws_codepipeline" "codepipeline" {
   }
 
   stage {
-    name = "Deploy"
+    name = "DeployInfra"
     action {
-      name            = "Deploy"
+      name            = "DeployInfra"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
-      input_artifacts = ["build_output"]
+      input_artifacts = ["build_infra_app_output"]
       version         = "1"
       configuration = {
         ApplicationName     = "firehawk-codedeploy-infra-app"
@@ -72,13 +73,33 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Test"
+    name = "SourceTest"
+
     action {
-      name            = "Test"
+      name             = "SourceTest"
+      category         = "Source"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
+      version          = "1"
+      output_artifacts = ["source_test_app_output"]
+
+      configuration = {
+        ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
+        FullRepositoryId     = "firehawkvfx/firehawk-pdg-test"
+        BranchName           = "main"
+        OutputArtifactFormat = "CODEBUILD_CLONE_REF"
+        # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
+      }
+    }
+  }
+  stage {
+    name = "TestApp"
+    action {
+      name            = "TestApp"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
-      input_artifacts = ["build_output"]
+      input_artifacts = ["source_test_app_output"] # TODO artifacts need to be configured correctly.
       version         = "1"
       configuration = {
         ApplicationName     = "firehawk-codedeploy-test-app"
@@ -108,7 +129,7 @@ resource "aws_codepipeline" "codepipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
+      input_artifacts  = ["source_infra_app_output"]
       output_artifacts = ["build_destroy_output"]
       version          = "1"
 
@@ -139,7 +160,7 @@ resource "aws_codepipeline" "codepipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
+      input_artifacts  = ["source_infra_app_output"]
       output_artifacts = ["deploy_destroy_output"]
       version          = "1"
 
