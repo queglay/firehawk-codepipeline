@@ -74,6 +74,9 @@ resource "aws_codedeploy_deployment_group" "firehawk_infra_deployment_group" {
 }
 
 resource "aws_codedeploy_deployment_group" "firehawk_test_deployment_group" {
+  depends_on = [
+    aws_codedeploy_app.firehawk_test_app
+  ]
   app_name              = aws_codedeploy_app.firehawk_test_app.name
   deployment_group_name = "firehawk-test-group"
   service_role_arn      = aws_iam_role.firehawk_role.arn
