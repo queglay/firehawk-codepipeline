@@ -90,40 +90,20 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   # stage {
-  #   name = "SourceTest"
-
+  #   name = "DeployTestApp"
   #   action {
-  #     name             = "SourceTest"
-  #     category         = "Source"
-  #     owner            = "AWS"
-  #     provider         = "CodeStarSourceConnection"
-  #     version          = "1"
-  #     output_artifacts = ["source_test_app_output"]
-
+  #     name            = "DeployTestApp"
+  #     category        = "Deploy"
+  #     owner           = "AWS"
+  #     provider        = "CodeDeploy"
+  #     input_artifacts = ["source_test_app_output"] # TODO artifacts need to be configured correctly.
+  #     version         = "1"
   #     configuration = {
-  #       ConnectionArn        = aws_codestarconnections_connection.my_github_connection.arn
-  #       FullRepositoryId     = "firehawkvfx/firehawk-pdg-test"
-  #       BranchName           = "main"
-  #       OutputArtifactFormat = "CODEBUILD_CLONE_REF"
-  #       # see https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-config
+  #       ApplicationName     = "firehawk-codedeploy-test-app"
+  #       DeploymentGroupName = "firehawk-test-group"
   #     }
   #   }
   # }
-  stage {
-    name = "DeployTestApp"
-    action {
-      name            = "DeployTestApp"
-      category        = "Deploy"
-      owner           = "AWS"
-      provider        = "CodeDeploy"
-      input_artifacts = ["source_test_app_output"] # TODO artifacts need to be configured correctly.
-      version         = "1"
-      configuration = {
-        ApplicationName     = "firehawk-codedeploy-test-app"
-        DeploymentGroupName = "firehawk-test-group"
-      }
-    }
-  }
   stage {
     name = "ApproveDestroy"
     action {
