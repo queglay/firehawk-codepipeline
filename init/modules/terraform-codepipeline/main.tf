@@ -37,12 +37,29 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
-
   stage {
-    name = "BuildInfra"
+    name = "BuildTestApp"
 
     action {
-      name             = "BuildInfra"
+      name             = "BuildTestApp"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      # The app itself defines it's source when not running in codepipeline, but in this case code pipeline defines the source via input_artifacts
+      input_artifacts  = ["source_infra_app_output"]
+      output_artifacts = ["source_test_app_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = "firehawk-testapp"
+      }
+    }
+  }
+  stage {
+    name = "BuildInfraApp"
+
+    action {
+      name             = "BuildInfraApp"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
@@ -58,9 +75,9 @@ resource "aws_codepipeline" "codepipeline" {
   }
 
   stage {
-    name = "DeployInfra"
+    name = "DeployInfraApp"
     action {
-      name            = "DeployInfra"
+      name            = "DeployInfraApp"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
@@ -93,27 +110,9 @@ resource "aws_codepipeline" "codepipeline" {
   #   }
   # }
   stage {
-    name = "BuildTest"
-
+    name = "DeployTestApp"
     action {
-      name             = "BuildTest"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      # The app itself defines it's source when not running in codepipeline, but in this case code pipeline defines the source via input_artifacts
-      input_artifacts  = ["source_infra_app_output"]
-      output_artifacts = ["source_test_app_output"]
-      version          = "1"
-
-      configuration = {
-        ProjectName = "firehawk-testapp"
-      }
-    }
-  }
-  stage {
-    name = "TestApp"
-    action {
-      name            = "TestApp"
+      name            = "DeployTestApp"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
@@ -126,7 +125,7 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Approve-Destroy"
+    name = "ApproveDestroy"
     action {
       name     = "ApproveDestroy"
       category = "Approval"
@@ -141,9 +140,9 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Build-Destroy"
+    name = "BuildDestroyInfraApp"
     action {
-      name             = "BuildDestroy"
+      name             = "BuildDestroyInfraApp"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
@@ -157,9 +156,9 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Destroy"
+    name = "DeployDestroyInfraApp"
     action {
-      name            = "Deploy"
+      name            = "DeployDestroyInfraApp"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
@@ -172,9 +171,9 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
   stage {
-    name = "Destroy-Deployer"
+    name = "DestroyDeployerInstance"
     action {
-      name             = "DestroyDeployer"
+      name             = "DestroyDeployerInstance"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"

@@ -309,7 +309,7 @@ resource "aws_codebuild_project" "firehawk_testapp" { # app to test deployment
     type            = "GITHUB"
     # location        = "https://github.com/firehawkvfx/firehawk.git"
     location        = "https://github.com/${data.aws_ssm_parameter.git_repo_id.value}.git"
-    buildspec       = "buildspec-createtestapp.yml" # TODO this is incorrect.
+    buildspec       = "buildspec/buildspec-createtestapp.yml" # TODO this is incorrect.
     git_clone_depth = 1
 
     git_submodules_config {
